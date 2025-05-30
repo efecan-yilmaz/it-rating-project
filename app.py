@@ -3,10 +3,35 @@ import pandas as pd
 import plotly.graph_objects as go
 
 st.set_page_config(layout="wide")
+JSON_FILE_PATH = "tool_data.json"
+
+def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
+    default_columns = ["Tool Name", "Category1", "Category2", "Category3", "Category4"]
+    try:
+        df = pd.read_json(file_path, orient='records', dtype=False)
+        # Ensure all necessary columns exist, add them if they don't
+        for col in default_columns:
+            if col not in df.columns:
+                df[col] = [[] if "Category" in col else "" for _ in range(len(df))]
+        # Ensure correct column order and fill NaNs appropriately
+        df = df.reindex(columns=default_columns)
+        for col in ["Category1", "Category2", "Category3", "Category4"]:
+             # Ensure category columns are lists, handling potential NaNs from reindex or initial load
+            df[col] = df[col].apply(lambda x: x if isinstance(x, list) else ([] if pd.isna(x) else [x]))
+        return df
+    except FileNotFoundError:
+        st.info(f"'{file_path}' not found. Starting with an empty tool list.")
+        return pd.DataFrame(columns=default_columns)
+    except ValueError as e: # Handles empty or malformed JSON
+        st.warning(f"Could not decode JSON from '{file_path}'. It might be empty or malformed. Error: {e}. Starting with an empty tool list.")
+        return pd.DataFrame(columns=default_columns)
+    except Exception as e:
+        st.error(f"An unexpected error occurred while loading '{file_path}': {e}. Starting with an empty tool list.")
+        return pd.DataFrame(columns=default_columns)
 
 # Initialize the DataFrame in session state if it doesn't exist
 if 'tool_data_df' not in st.session_state:
-    st.session_state.tool_data_df = pd.DataFrame(columns=["Tool Name", "Category1", "Category2", "Category3", "Category4"])
+    st.session_state.tool_data_df = load_tool_data_from_json(JSON_FILE_PATH)
 
 if "tool_name_input" not in st.session_state:
     st.session_state.tool_name_input = ""
@@ -18,6 +43,20 @@ if "cat3_select" not in st.session_state:
     st.session_state.cat3_select = []
 if "cat4_select" not in st.session_state:
     st.session_state.cat4_select = []
+
+def export_tool_data_to_json(file_path: str = JSON_FILE_PATH):
+    if 'tool_data_df' not in st.session_state:
+        return
+
+    df_to_save = st.session_state.tool_data_df
+
+    if not isinstance(df_to_save, pd.DataFrame):
+        st.error(f"Error while saving the data")
+        return
+    try:
+        df_to_save.to_json(file_path, orient="records", indent=4, force_ascii=False)
+    except Exception as e:
+        st.error(f"Error while saving data to '{file_path}': {e}")
 
 st.title("Tool Collection")
 st.write("Please enter your IT tools and select related catagories")
@@ -41,6 +80,7 @@ def add_tool_callback():
         }
         new_row_df = pd.DataFrame([new_row])
         st.session_state.tool_data_df = pd.concat([st.session_state.tool_data_df, new_row_df], ignore_index=True)
+        export_tool_data_to_json(JSON_FILE_PATH)
         st.success(f"Tool '{tool_name}' added successfully!")
         st.session_state.tool_name_input = ""
         st.session_state.cat1_select = []
@@ -67,11 +107,12 @@ def on_table_selection(): None # necessary for dataframe to show the line select
 def delete_from_table():
     current_df = st.session_state.tool_data_df
     st.session_state.tool_data_df = current_df.drop(st.session_state.tool_data_df_edit.selection.rows).reset_index(drop=True)
+    export_tool_data_to_json(JSON_FILE_PATH)
 
 if st.session_state.tool_data_df.empty:
     st.info("No tools added yet. Use the form above to add your first tool.")
 else:
-    st.button("🗑️ Delete", on_click=delete_from_table)
+    st.button("🗑️ Delete Selected", on_click=delete_from_table)
     st.dataframe(st.session_state.tool_data_df, selection_mode="multi-row", on_select=on_table_selection, key="tool_data_df_edit")
 
 st.header("IT Tools Fishbone Diagram")
