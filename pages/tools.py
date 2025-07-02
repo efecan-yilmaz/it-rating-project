@@ -67,10 +67,10 @@ def add_tool_callback():
 col1, col2, col3, col4, col5 = st.columns(5)
 
 col1.text_input("Tool name", key="tool_name_input")
-col2.multiselect("Category1", ["a", "b", "c"], key="cat1_select")
-col3.multiselect("Category2", ["a", "b", "c"], key="cat2_select")
-col4.multiselect("Category3", ["a", "b", "c"], key="cat3_select")
-col5.multiselect("Category4", ["a", "b", "c"], key="cat4_select")
+col2.multiselect("Communication", ["Text chatting", "Conducting Video calls/conferencing", "Sharing - Calendars", "Sharing - Screens", "Sharing - Locations", "Sending Email", "Commenting on Artefacts", "Providing Status updates"], key="cat1_select")
+col3.multiselect("Data- & Knowledge Management", ["Searching - (Filtering) Information", "Curating and Organizing Content", "Sharing - Branch Data", "User Profile", "Categorizing and Tagging - Data/Information/Knowledge", "Synchronous, simultaneous editing", "Versioning Data", "Transforming Data", "Archiving Data", "Back Up Data", "Using Forums/discussion boards", "Submitting Ideas", "Rating - Ideas", "Categorizing and Tagging - Ideas", "Tracking Idea Progress", "Customizing Idea Management Workflow", "Creating multiple Projects", "Brainstorming Ideas", "Allocating product data (CAE data etc.)", "Allocating Bill of Materials (BoM)", "Managing Productworkflow and Processes", "Versioning and change tracking for technical documents and product data", "Establishing common language (Glossar tc.)", "Establishing Q&A document", "API Access", "Online Access", "Assigning access rights", "Authentification"], key="cat2_select")
+col4.multiselect("Project Management", ["Informing about Leave and Absences", "Delegating Tasks and Follow-up Tracking", "Assining Resources", "Reviewing - tasks", "Working in multiple Projects", "Planning and Scheduling Changes", "Collecting Feedback", "Data analysis - impact analysis", "Visualizing Data", "Sharing - Report", "Conducting Surveys and Polls", "Searching (Filtering) Information- Query", "Data analysis", "Data modelling", "Reporting - Problem (Ticket System, etc)", "Reporting - via dashboards"], key="cat3_select")
+col5.multiselect("Product Design", ["Developing solution options", "Rating - solution options", "Assess feasibility", "Sharing - Designs", "Performing numerical analysis", "Designing - 3D Modells and Assemblies", "Rendering and Visualizing Products", "Simulating Designs", "Preparing Prototypes", "Integrating Designs with Manufacturing Processes", "Using AR/VR environments", "Customizing User Interface and Ease of Use", "Gathering and defining requirements", "Negotiate product development contract", "Prioritising requirements", "Tracing requirements", "Validating requirements (Align results with stakeholders)", "Writing Lasten-/Pflichtenheft", "Create system architecture", "Open and view Designs", "Providing Feedback", "Review - Status Updates (Approval, Revision…)", ""], key="cat4_select")
 
 st.button("➕ Add", on_click=add_tool_callback)
 
@@ -88,7 +88,18 @@ if st.session_state.tool_data_df.empty:
     st.info("No tools added yet. Use the form above to add your first tool.")
 else:
     st.button("🗑️ Delete Selected", on_click=delete_from_table)
-    st.dataframe(st.session_state.tool_data_df, selection_mode="multi-row", on_select=on_table_selection, key="tool_data_df_edit")
+    st.dataframe(
+        st.session_state.tool_data_df,
+        selection_mode="multi-row",
+        on_select=on_table_selection,
+        key="tool_data_df_edit",
+        column_config={
+            "Category1": st.column_config.ListColumn("Communication"),
+            "Category2": st.column_config.ListColumn("Data- & Knowledge Management"),
+            "Category3": st.column_config.ListColumn("Project Management"),
+            "Category4": st.column_config.ListColumn("Product Design"),
+        },
+    )
 
 st.header("IT Tools Fishbone Diagram")
 
