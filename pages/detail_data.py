@@ -1,12 +1,21 @@
 import streamlit as st
 import pandas as pd
 
-from utils.utils import JSON_FILE_PATH, load_tool_data_from_json, JSON_MANUAL_TASKS_PATH, load_manual_task_data_from_json
+from utils.utils import (
+    JSON_FILE_PATH,
+    load_tool_data_from_json,
+    JSON_MANUAL_TASKS_PATH,
+    load_manual_task_data_from_json,
+    JSON_DETAILS_DATA_PATH,
+    load_details_data_from_json,
+    export_data_to_json
+)
 
 st.title("Tool Details Collection")
 st.write("Please select details for entered tools. Double click to edit the value in the column.")
 
 # Load data
+details_df = load_details_data_from_json(JSON_DETAILS_DATA_PATH)
 tool_df = load_tool_data_from_json(JSON_FILE_PATH)
 manual_task_df = load_manual_task_data_from_json(JSON_MANUAL_TASKS_PATH)
 
@@ -57,6 +66,30 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
 
     # Reorder columns to the specified format
     final_df = combined_df[['category', 'tool', 'digitalization', 'ai level', 'centralization', 'syncronization', 'colloborative']]
+
+    # Create a copy of the loaded details to check if an update is needed on load.
+    details_from_disk = details_df.copy()
+
+    # Merge with existing details data if it exists
+    if not details_from_disk.empty:
+        # Use category and tool as index for easy updating
+        final_df.set_index(['category', 'tool'], inplace=True)
+        # Ensure the loaded details_df has the same index
+        details_from_disk.set_index(['category', 'tool'], inplace=True)
+        # Update final_df with the values from details_df
+        final_df.update(details_from_disk)
+        # Reset index to get columns back
+        final_df.reset_index(inplace=True)
+
+    # On first load, check if the generated data (with merged details) is different
+    # from what's on disk. If so, save it to sync new/deleted tools. This happens
+    # silently to ensure the details file is always up-to-date.
+    cols = sorted(final_df.columns.tolist())
+    final_df_sorted = final_df[cols].sort_values(by=['category', 'tool']).reset_index(drop=True)
+    details_df_sorted = details_df[cols].sort_values(by=['category', 'tool']).reset_index(drop=True) if not details_df.empty else pd.DataFrame(columns=cols)
+
+    if not final_df_sorted.equals(details_df_sorted):
+        export_data_to_json(final_df, JSON_DETAILS_DATA_PATH)
 
     # Split the dataframe into tools and manual tasks for separate display
     tools_display_df = final_df[final_df['tool'] != 'None'].reset_index(drop=True)
@@ -109,7 +142,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
             required=True,
         )
 
-        st.data_editor(
+        edited_tools_df = st.data_editor(
             tools_display_df,
             use_container_width=True,
             column_config=editor_column_config,
@@ -141,7 +174,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
             required=True,
         )
 
-        st.data_editor(
+        edited_manual_tasks_df = st.data_editor(
             manual_tasks_display_df,
             use_container_width=True,
             column_config=manual_tasks_editor_config,
@@ -149,5 +182,21 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
             hide_index=True,
             key="manual_tasks_editor"
         )
+
+    # Check for changes and save the data
+    # This block will run on every interaction with the data_editor widgets
+    has_tool_changes = not tools_display_df.equals(edited_tools_df)
+    has_manual_task_changes = not manual_tasks_display_df.equals(edited_manual_tasks_df)
+
+    if has_tool_changes or has_manual_task_changes:
+        # Combine the (potentially) edited dataframes
+        df_to_save = pd.concat([edited_tools_df, edited_manual_tasks_df], ignore_index=True)
+
+        # Select only the columns we want to save, to avoid saving streamlit's internal index
+        columns_to_save = ['category', 'tool', 'digitalization', 'ai level', 'centralization', 'syncronization', 'colloborative']
+        df_to_save = df_to_save[columns_to_save]
+
+        export_data_to_json(df_to_save, JSON_DETAILS_DATA_PATH)
+        st.toast("Changes saved successfully!", icon="💾")
 else:
     st.info("No tools or manual tasks found. Please add them in Step 1 and Step 2.")

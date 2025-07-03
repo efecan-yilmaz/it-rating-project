@@ -3,6 +3,7 @@ import streamlit as st
 
 JSON_FILE_PATH = "tool_data.json"
 JSON_MANUAL_TASKS_PATH = "manual_tasks_data.json"
+JSON_DETAILS_DATA_PATH = "details_data.json"
 
 def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
     default_columns = ["Tool Name", "Category1", "Category2", "Category3", "Category4"]
@@ -44,3 +45,23 @@ def load_manual_task_data_from_json(file_path: str) -> pd.DataFrame:
     except Exception as e:
         st.toast(f"An unexpected error occurred while loading '{file_path}': {e}. Starting with an empty manual task list.")
         return pd.DataFrame(columns=default_columns)
+
+def load_details_data_from_json(file_path: str) -> pd.DataFrame:
+    """Loads the details data from a JSON file."""
+    try:
+        df = pd.read_json(file_path, orient='records', dtype=False)
+        return df
+    except (FileNotFoundError, ValueError):
+        # Return empty df if file not found or empty/malformed
+        return pd.DataFrame()
+
+def export_data_to_json(df: pd.DataFrame, file_path: str):
+    """Generic function to export a DataFrame to a JSON file."""
+    if not isinstance(df, pd.DataFrame):
+        st.toast(f"Error: Data to save is not a DataFrame.")
+        return
+    try:
+        df.to_json(file_path, orient="records", indent=4, force_ascii=False)
+        # st.toast(f"Data saved to {file_path}", icon="💾") # Optional: uncomment for save confirmation
+    except Exception as e:
+        st.toast(f"Error while saving data to '{file_path}': {e}")

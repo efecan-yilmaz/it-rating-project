@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from utils.utils import JSON_FILE_PATH, load_tool_data_from_json
+from utils.utils import JSON_FILE_PATH, load_tool_data_from_json, export_data_to_json
 
 # Initialize the DataFrame in session state if it doesn't exist
 if 'tool_data_df' not in st.session_state:
@@ -17,20 +17,6 @@ if "cat3_select" not in st.session_state:
     st.session_state.cat3_select = []
 if "cat4_select" not in st.session_state:
     st.session_state.cat4_select = []
-
-def export_tool_data_to_json(file_path: str = JSON_FILE_PATH):
-    if 'tool_data_df' not in st.session_state:
-        return
-
-    df_to_save = st.session_state.tool_data_df
-
-    if not isinstance(df_to_save, pd.DataFrame):
-        st.toast(f"Error while saving the data")
-        return
-    try:
-        df_to_save.to_json(file_path, orient="records", indent=4, force_ascii=False)
-    except Exception as e:
-        st.toast(f"Error while saving data to '{file_path}': {e}")
 
 st.title("IT Tool Data Collection")
 st.write("Please enter your IT tools and select related catagories")
@@ -54,7 +40,7 @@ def add_tool_callback():
         }
         new_row_df = pd.DataFrame([new_row])
         st.session_state.tool_data_df = pd.concat([st.session_state.tool_data_df, new_row_df], ignore_index=True)
-        export_tool_data_to_json(JSON_FILE_PATH)
+        export_data_to_json(st.session_state.tool_data_df, JSON_FILE_PATH)
         st.toast(f"Tool '{tool_name}' added successfully!")
         st.session_state.tool_name_input = ""
         st.session_state.cat1_select = []
@@ -88,7 +74,7 @@ def on_table_selection(): () # necessary for dataframe to show the line selectio
 def delete_from_table():
     current_df = st.session_state.tool_data_df
     st.session_state.tool_data_df = current_df.drop(st.session_state.tool_data_df_edit.selection.rows).reset_index(drop=True)
-    export_tool_data_to_json(JSON_FILE_PATH)
+    export_data_to_json(st.session_state.tool_data_df, JSON_FILE_PATH)
     st.toast("Selected tool(s) deleted.")
 
 if st.session_state.tool_data_df.empty:
