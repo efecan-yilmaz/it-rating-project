@@ -43,8 +43,6 @@ def add_manual_task_callback():
 
 st.header("New Data")
 
-# Inject custom CSS to hide the "Press Enter to apply" hint.
-# This is a visual-only change and does not affect the logic.
 st.markdown("""
     <style>
         div[data-testid="stHint"] {
