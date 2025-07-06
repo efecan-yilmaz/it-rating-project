@@ -30,16 +30,18 @@ def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
         return pd.DataFrame(columns=default_columns)
 
 def load_manual_task_data_from_json(file_path: str) -> pd.DataFrame:
-    default_columns = ["Manual Task"]
+    default_columns = ["CategoryGroup", "CategoryName"]
     try:
         df = pd.read_json(file_path, orient="records", dtype=False)
-        # Ensure correct column order, drop any others, and fill NaNs.
-        df = df.reindex(columns=default_columns).fillna("")
+        for col in default_columns:
+            if col not in df.columns:
+                df[col] = ""
+        df = df.reindex(columns=default_columns)
         return df
     except FileNotFoundError:
         st.toast(f"'{file_path}' not found. Starting with an empty manual task list.")
         return pd.DataFrame(columns=default_columns)
-    except ValueError as e: # Handles empty or malformed JSON
+    except ValueError as e:
         st.toast(f"Could not decode JSON from '{file_path}'. It might be empty or malformed. Error: {e}. Starting with an empty manual task list.")
         return pd.DataFrame(columns=default_columns)
     except Exception as e:

@@ -43,7 +43,7 @@ else:
 if not manual_task_df.empty:
     # For manual tasks, the task name becomes the category, and the tool is 'None'.
     processed_manual_tasks_df = pd.DataFrame()
-    processed_manual_tasks_df['category'] = manual_task_df['Manual Task']
+    processed_manual_tasks_df['category'] = manual_task_df['CategoryName']
     processed_manual_tasks_df['tool'] = 'None'
 else:
     processed_manual_tasks_df = pd.DataFrame(columns=['tool', 'category'])
@@ -92,7 +92,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     manual_tasks_display_df = final_df[final_df['tool'] == 'None'].reset_index(drop=True)
 
     column_config = {
-        "category": "Category",
+        "category": "Collaborative Activities",
         "tool": "Tool",
         "digitalization": "Digitalization",
         "ai level": "AI Level",
