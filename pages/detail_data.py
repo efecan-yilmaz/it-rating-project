@@ -52,7 +52,6 @@ else:
 if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     combined_df = pd.concat([processed_tools_df, processed_manual_tasks_df], ignore_index=True)
 
-    # Add default value columns as requested
     combined_df['digitalization'] = 'Automation'  # Default for tools
     # For manual tasks (where tool is 'None'), set digitalization to 'Manual'
     combined_df.loc[combined_df['tool'] == 'None', 'digitalization'] = 'Manual'
@@ -61,13 +60,10 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     combined_df['syncronization'] = 'API-Real-Time'
     combined_df['colloborative'] = 'Not Collaborative'
 
-    # Fill NA in the tool column with an empty string for cleaner display
     combined_df['tool'] = combined_df['tool'].fillna('')
 
-    # Reorder columns to the specified format
     final_df = combined_df[['category', 'tool', 'digitalization', 'ai level', 'centralization', 'syncronization', 'colloborative']]
 
-    # Create a copy of the loaded details to check if an update is needed on load.
     details_from_disk = details_df.copy()
 
     # Merge with existing details data if it exists
@@ -95,7 +91,6 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     tools_display_df = final_df[final_df['tool'] != 'None'].reset_index(drop=True)
     manual_tasks_display_df = final_df[final_df['tool'] == 'None'].reset_index(drop=True)
 
-    # Define the common column configuration for display labels
     column_config = {
         "category": "Category",
         "tool": "Tool",
@@ -183,8 +178,6 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
             key="manual_tasks_editor"
         )
 
-    # Check for changes and save the data
-    # This block will run on every interaction with the data_editor widgets
     has_tool_changes = not tools_display_df.equals(edited_tools_df)
     has_manual_task_changes = not manual_tasks_display_df.equals(edited_manual_tasks_df)
 
@@ -192,11 +185,11 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
         # Combine the (potentially) edited dataframes
         df_to_save = pd.concat([edited_tools_df, edited_manual_tasks_df], ignore_index=True)
 
-        # Select only the columns we want to save, to avoid saving streamlit's internal index
         columns_to_save = ['category', 'tool', 'digitalization', 'ai level', 'centralization', 'syncronization', 'colloborative']
         df_to_save = df_to_save[columns_to_save]
 
         export_data_to_json(df_to_save, JSON_DETAILS_DATA_PATH)
         st.toast("Changes saved successfully!", icon="💾")
+        st.rerun()
 else:
     st.info("No tools or manual tasks found. Please add them in Step 1 and Step 2.")
