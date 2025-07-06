@@ -30,25 +30,31 @@ def add_tool_callback():
     category3 = st.session_state.cat3_select
     category4 = st.session_state.cat4_select
 
-    if tool_name:
-        new_row = {
-            "Tool Name": tool_name,
-            "Category1": category1,
-            "Category2": category2,
-            "Category3": category3,
-            "Category4": category4
-        }
-        new_row_df = pd.DataFrame([new_row])
-        st.session_state.tool_data_df = pd.concat([st.session_state.tool_data_df, new_row_df], ignore_index=True)
-        export_data_to_json(st.session_state.tool_data_df, JSON_FILE_PATH)
-        st.toast(f"Tool '{tool_name}' added successfully!")
-        st.session_state.tool_name_input = ""
-        st.session_state.cat1_select = []
-        st.session_state.cat2_select = []
-        st.session_state.cat3_select = []
-        st.session_state.cat4_select = []
-    else:
+    if not tool_name:
         st.toast("Tool name cannot be empty.")
+        return
+
+    # Require at least one category to be selected
+    if not (category1 or category2 or category3 or category4):
+        st.toast("Please select at least one category.")
+        return
+
+    new_row = {
+        "Tool Name": tool_name,
+        "Category1": category1,
+        "Category2": category2,
+        "Category3": category3,
+        "Category4": category4
+    }
+    new_row_df = pd.DataFrame([new_row])
+    st.session_state.tool_data_df = pd.concat([st.session_state.tool_data_df, new_row_df], ignore_index=True)
+    export_data_to_json(st.session_state.tool_data_df, JSON_FILE_PATH)
+    st.toast(f"Tool '{tool_name}' added successfully!")
+    st.session_state.tool_name_input = ""
+    st.session_state.cat1_select = []
+    st.session_state.cat2_select = []
+    st.session_state.cat3_select = []
+    st.session_state.cat4_select = []
 
 col1, col2, col3, col4, col5 = st.columns(5)
 

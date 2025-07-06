@@ -4,6 +4,7 @@ import streamlit as st
 JSON_FILE_PATH = "tool_data.json"
 JSON_MANUAL_TASKS_PATH = "manual_tasks_data.json"
 JSON_DETAILS_DATA_PATH = "details_data.json"
+JSON_KPI_DETAILS_DATA_PATH = "kpi_details_data.json"
 
 def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
     default_columns = ["Tool Name", "Category1", "Category2", "Category3", "Category4"]

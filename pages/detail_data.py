@@ -11,6 +11,13 @@ from utils.utils import (
     export_data_to_json
 )
 
+from data.SelectValues import (
+    DigitalizationOptions,
+    AILevelOptions,
+    synchronizationOptions,
+    ColloborativeOptions
+)
+
 st.title("Tool Details Collection")
 st.write("Please select details for entered tools. Double click to edit the value in the column.")
 
@@ -52,17 +59,16 @@ else:
 if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     combined_df = pd.concat([processed_tools_df, processed_manual_tasks_df], ignore_index=True)
 
-    combined_df['digitalization'] = 'Automation'  # Default for tools
+    combined_df['digitalization'] = 'Automated'  # Default for tools
     # For manual tasks (where tool is 'None'), set digitalization to 'Manual'
     combined_df.loc[combined_df['tool'] == 'None', 'digitalization'] = 'Manual'
-    combined_df['ai level'] = 'No'
-    combined_df['centralization'] = 'Local'
-    combined_df['syncronization'] = 'API-Real-Time'
+    combined_df['aiLevel'] = 'No'
+    combined_df['synchronization'] = 'Ad-Hoc File Sharing'
     combined_df['colloborative'] = 'Not Collaborative'
 
     combined_df['tool'] = combined_df['tool'].fillna('')
 
-    final_df = combined_df[['category', 'tool', 'digitalization', 'ai level', 'centralization', 'syncronization', 'colloborative']]
+    final_df = combined_df[['category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative']]
 
     details_from_disk = details_df.copy()
 
@@ -95,11 +101,12 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
         "category": "Collaborative Activities",
         "tool": "Tool",
         "digitalization": "Digitalization",
-        "ai level": "AI Level",
-        "centralization": "Centralization",
-        "syncronization": "Syncronization",
+        "aiLevel": "AI Level",
+        "synchronization": "synchronization",
         "colloborative": "Colloborative",
     }
+
+    save_clicked = st.button("💾 Save Changes", type="primary")
 
     # Display editable table for tools
     if not tools_display_df.empty:
@@ -109,31 +116,25 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
         editor_column_config["digitalization"] = st.column_config.SelectboxColumn(
             "Digitalization",
             help="Select the digitalization level of the tool",
-            options=["Automation", "AI-Assisted"],
+            options=DigitalizationOptions,
             required=True,
         )
-        editor_column_config["ai level"] = st.column_config.SelectboxColumn(
+        editor_column_config["aiLevel"] = st.column_config.SelectboxColumn(
             "AI Level",
             help="Select the AI level of the tool",
-            options=["No", "Descriptive"],
+            options=AILevelOptions,
             required=True,
         )
-        editor_column_config["centralization"] = st.column_config.SelectboxColumn(
-            "Centralization",
-            help="Select the centralization of the tool",
-            options=["Local", "SaaS", "Cloud"],
-            required=True,
-        )
-        editor_column_config["syncronization"] = st.column_config.SelectboxColumn(
-            "Syncronization",
-            help="Select the syncronization of the tool",
-            options=["API-Real-Time", "No-Local-Server", "Server-Real-Time"],
+        editor_column_config["synchronization"] = st.column_config.SelectboxColumn(
+            "synchronization",
+            help="Select the synchronization of the tool",
+            options=synchronizationOptions,
             required=True,
         )
         editor_column_config["colloborative"] = st.column_config.SelectboxColumn(
             "Colloborative",
             help="Select if the tool is collaborative",
-            options=["Not Collaborative", "Collaborative"],
+            options=ColloborativeOptions,
             required=True,
         )
 
@@ -150,22 +151,16 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     if not manual_tasks_display_df.empty:
         st.subheader("Manual Tasks")
         manual_tasks_editor_config = column_config.copy()
-        manual_tasks_editor_config["centralization"] = st.column_config.SelectboxColumn(
-            "Centralization",
-            help="Select the centralization of the manual task",
-            options=["Local", "SaaS", "Cloud"],
-            required=True,
-        )
-        manual_tasks_editor_config["syncronization"] = st.column_config.SelectboxColumn(
-            "Syncronization",
-            help="Select the syncronization of the manual task",
-            options=["API-Real-Time", "No-Local-Server", "Server-Real-Time"],
+        manual_tasks_editor_config["synchronization"] = st.column_config.SelectboxColumn(
+            "synchronization",
+            help="Select the synchronization of the manual task",
+            options=synchronizationOptions,
             required=True,
         )
         manual_tasks_editor_config["colloborative"] = st.column_config.SelectboxColumn(
             "Colloborative",
             help="Select if the manual task is collaborative",
-            options=["Not Collaborative", "Collaborative"],
+            options=ColloborativeOptions,
             required=True,
         )
 
@@ -173,23 +168,17 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
             manual_tasks_display_df,
             use_container_width=True,
             column_config=manual_tasks_editor_config,
-            disabled=["category", "tool", "digitalization", "ai level"],
+            disabled=["category", "tool", "digitalization", "aiLevel"],
             hide_index=True,
             key="manual_tasks_editor"
         )
 
-    has_tool_changes = not tools_display_df.equals(edited_tools_df)
-    has_manual_task_changes = not manual_tasks_display_df.equals(edited_manual_tasks_df)
-
-    if has_tool_changes or has_manual_task_changes:
-        # Combine the (potentially) edited dataframes
+    # Save only when the button is clicked
+    if save_clicked:
         df_to_save = pd.concat([edited_tools_df, edited_manual_tasks_df], ignore_index=True)
-
-        columns_to_save = ['category', 'tool', 'digitalization', 'ai level', 'centralization', 'syncronization', 'colloborative']
+        columns_to_save = ['category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative']
         df_to_save = df_to_save[columns_to_save]
-
         export_data_to_json(df_to_save, JSON_DETAILS_DATA_PATH)
-        st.toast("Changes saved successfully!", icon="💾")
         st.rerun()
 else:
     st.info("No tools or manual tasks found. Please add them in Step 1 and Step 2.")

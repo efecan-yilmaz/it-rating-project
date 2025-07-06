@@ -1,0 +1,5 @@
+DigitalizationOptions = ["Automated", "AI-Asisted", "AI-Driven Automation"]
+AILevelOptions = ["No", "Descriptive", "Diagnostic", "Predictive", "Prescriptive"]
+synchronizationOptions = ["Ad-Hoc File Sharing", "Planned Batch Exchange", "Standardized Data Interfaces", "Real-Time Ecosystem Integration"]
+ColloborativeOptions = ["Not Collaborative", "Collaborative"]
+NeedForChangeOptions = ["Won't", "Can't", "Should", "Must"]
