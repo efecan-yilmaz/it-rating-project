@@ -179,6 +179,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
         columns_to_save = ['category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative']
         df_to_save = df_to_save[columns_to_save]
         export_data_to_json(df_to_save, JSON_DETAILS_DATA_PATH)
+        st.toast("Changes saved successfully!", icon="💾")
         st.rerun()
 else:
     st.info("No tools or manual tasks found. Please add them in Step 1 and Step 2.")

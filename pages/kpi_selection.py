@@ -30,47 +30,43 @@ def generate_random_scores(length):
     return [round(random.uniform(1, 5), 1) for _ in range(length)]
 
 # Load data
-if 'details_df' not in st.session_state:
-    st.session_state['details_df'] = load_details_data_from_json(JSON_DETAILS_DATA_PATH)
-details_df = st.session_state['details_df']
+details_df = load_details_data_from_json(JSON_DETAILS_DATA_PATH)
 
 # --- Synchronize KPI details with details data ---
-if 'kpi_details_df' not in st.session_state:
-    # Check if KPI details file exists
-    if os.path.exists(JSON_KPI_DETAILS_DATA_PATH):
-        kpi_details_df = load_details_data_from_json(JSON_KPI_DETAILS_DATA_PATH)
-        # Remove entries not in details_df
-        merged = pd.merge(
-            kpi_details_df,
-            details_df[['category', 'tool']],
-            on=['category', 'tool'],
-            how='inner'
-        )
-        # Find new entries in details_df
-        merged_keys = merged[['category', 'tool']].apply(tuple, axis=1)
-        details_keys = details_df[['category', 'tool']].apply(tuple, axis=1)
-        new_entries = details_df[~details_keys.isin(merged_keys)]
-        # Add new entries with default values
-        if not new_entries.empty:
-            new_entries = new_entries.copy()
-            new_entries['setAsKpi'] = False
-            new_entries['needForChange'] = "Won't"
-            new_entries['qualityScore'] = generate_random_scores(len(new_entries))
-            new_entries['usageScore'] = generate_random_scores(len(new_entries))
-            new_entries['timeScore'] = generate_random_scores(len(new_entries))
-            merged = pd.concat([merged, new_entries], ignore_index=True)
-    else:
-        # If KPI details file doesn't exist, use all details data with default values
-        merged = details_df.copy()
-        merged['setAsKpi'] = False
-        merged['needForChange'] = "Won't"
-        merged['qualityScore'] = generate_random_scores(len(merged))
-        merged['usageScore'] = generate_random_scores(len(merged))
-        merged['timeScore'] = generate_random_scores(len(merged))
-    st.session_state['kpi_details_df'] = merged
-    export_data_to_json(merged, JSON_KPI_DETAILS_DATA_PATH)
+if os.path.exists(JSON_KPI_DETAILS_DATA_PATH):
+    kpi_details_df = load_details_data_from_json(JSON_KPI_DETAILS_DATA_PATH)
+    # Remove entries not in details_df
+    merged = pd.merge(
+        kpi_details_df,
+        details_df[['category', 'tool']],
+        on=['category', 'tool'],
+        how='inner'
+    )
+    # Find new entries in details_df
+    merged_keys = merged[['category', 'tool']].apply(tuple, axis=1)
+    details_keys = details_df[['category', 'tool']].apply(tuple, axis=1)
+    new_entries = details_df[~details_keys.isin(merged_keys)]
+    # Add new entries with default values
+    if not new_entries.empty:
+        new_entries = new_entries.copy()
+        new_entries['setAsKpi'] = False
+        new_entries['needForChange'] = "Won't"
+        new_entries['qualityScore'] = generate_random_scores(len(new_entries))
+        new_entries['usageScore'] = generate_random_scores(len(new_entries))
+        new_entries['timeScore'] = generate_random_scores(len(new_entries))
+        merged = pd.concat([merged, new_entries], ignore_index=True)
 else:
-    merged = st.session_state['kpi_details_df']
+    # If KPI details file doesn't exist, use all details data with default values
+    merged = details_df.copy()
+    merged['setAsKpi'] = False
+    merged['needForChange'] = "Won't"
+    merged['qualityScore'] = generate_random_scores(len(merged))
+    merged['usageScore'] = generate_random_scores(len(merged))
+    merged['timeScore'] = generate_random_scores(len(merged))
+
+# Save merged to file and session state for editing
+st.session_state['kpi_details_df'] = merged
+export_data_to_json(merged, JSON_KPI_DETAILS_DATA_PATH)
 
 # Use 'merged' as your working dataframe for KPI selection
 if not merged.empty:
@@ -189,6 +185,7 @@ if not merged.empty:
         columns_to_save = ['setAsKpi', 'needForChange', 'qualityScore', 'usageScore', 'timeScore', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative']
         df_to_save = df_to_save[columns_to_save]
         export_data_to_json(df_to_save, JSON_KPI_DETAILS_DATA_PATH)
+        st.toast("Changes saved successfully!", icon="💾")
 
 else:
     st.info("No details data available. Please complete the previous steps first.")
