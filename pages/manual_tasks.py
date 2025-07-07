@@ -1,38 +1,13 @@
 import streamlit as st
 import pandas as pd
 from utils.utils import JSON_MANUAL_TASKS_PATH, load_manual_task_data_from_json, export_data_to_json
+from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options)
 
 CATEGORY_OPTIONS = {
-    "Communication": [
-        "Text chatting", "Conducting Video calls/conferencing", "Sharing - Calendars", "Sharing - Screens",
-        "Sharing - Locations", "Sending Email", "Commenting on Artefacts", "Providing Status updates"
-    ],
-    "Data- & Knowledge Management": [
-        "Searching - (Filtering) Information", "Curating and Organizing Content", "Sharing - Branch Data", "User Profile",
-        "Categorizing and Tagging - Data/Information/Knowledge", "Synchronous, simultaneous editing", "Versioning Data",
-        "Transforming Data", "Archiving Data", "Back Up Data", "Using Forums/discussion boards", "Submitting Ideas",
-        "Rating - Ideas", "Categorizing and Tagging - Ideas", "Tracking Idea Progress", "Customizing Idea Management Workflow",
-        "Creating multiple Projects", "Brainstorming Ideas", "Allocating product data (CAE data etc.)",
-        "Allocating Bill of Materials (BoM)", "Managing Productworkflow and Processes",
-        "Versioning and change tracking for technical documents and product data", "Establishing common language (Glossar tc.)",
-        "Establishing Q&A document", "API Access", "Online Access", "Assigning access rights", "Authentification"
-    ],
-    "Project Management": [
-        "Informing about Leave and Absences", "Delegating Tasks and Follow-up Tracking", "Assining Resources",
-        "Reviewing - tasks", "Working in multiple Projects", "Planning and Scheduling Changes", "Collecting Feedback",
-        "Data analysis - impact analysis", "Visualizing Data", "Sharing - Report", "Conducting Surveys and Polls",
-        "Searching (Filtering) Information- Query", "Data analysis", "Data modelling", "Reporting - Problem (Ticket System, etc)",
-        "Reporting - via dashboards"
-    ],
-    "Product Design": [
-        "Developing solution options", "Rating - solution options", "Assess feasibility", "Sharing - Designs",
-        "Performing numerical analysis", "Designing - 3D Modells and Assemblies", "Rendering and Visualizing Products",
-        "Simulating Designs", "Preparing Prototypes", "Integrating Designs with Manufacturing Processes", "Using AR/VR environments",
-        "Customizing User Interface and Ease of Use", "Gathering and defining requirements", "Negotiate product development contract",
-        "Prioritising requirements", "Tracing requirements", "Validating requirements (Align results with stakeholders)",
-        "Writing Lasten-/Pflichtenheft", "Create system architecture", "Open and view Designs", "Providing Feedback",
-        "Review - Status Updates (Approval, Revision…)", "Designing - 2D Models and Assemblies"
-    ]
+    "Communication": sorted(Category1Options),
+    "Data- & Knowledge Management": sorted(Category2Options),
+    "Project Management": sorted(Category3Options),
+    "Product Design": sorted(Category4Options)
 }
 
 # Initialize the DataFrame in session state if it doesn't exist

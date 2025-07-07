@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from utils.utils import JSON_FILE_PATH, load_tool_data_from_json, export_data_to_json
+from utils.utils import (JSON_FILE_PATH, load_tool_data_from_json, export_data_to_json)
+from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options)
 
 # Initialize the DataFrame in session state if it doesn't exist
 if 'tool_data_df' not in st.session_state:
@@ -66,10 +67,10 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 col1.text_input("Tool name", key="tool_name_input")
-col2.multiselect("Communication", ["Text chatting", "Conducting Video calls/conferencing", "Sharing - Calendars", "Sharing - Screens", "Sharing - Locations", "Sending Email", "Commenting on Artefacts", "Providing Status updates"], key="cat1_select")
-col3.multiselect("Data- & Knowledge Management", ["Searching - (Filtering) Information", "Curating and Organizing Content", "Sharing - Branch Data", "User Profile", "Categorizing and Tagging - Data/Information/Knowledge", "Synchronous, simultaneous editing", "Versioning Data", "Transforming Data", "Archiving Data", "Back Up Data", "Using Forums/discussion boards", "Submitting Ideas", "Rating - Ideas", "Categorizing and Tagging - Ideas", "Tracking Idea Progress", "Customizing Idea Management Workflow", "Creating multiple Projects", "Brainstorming Ideas", "Allocating product data (CAE data etc.)", "Allocating Bill of Materials (BoM)", "Managing Productworkflow and Processes", "Versioning and change tracking for technical documents and product data", "Establishing common language (Glossar tc.)", "Establishing Q&A document", "API Access", "Online Access", "Assigning access rights", "Authentification"], key="cat2_select")
-col4.multiselect("Project Management", ["Informing about Leave and Absences", "Delegating Tasks and Follow-up Tracking", "Assining Resources", "Reviewing - tasks", "Working in multiple Projects", "Planning and Scheduling Changes", "Collecting Feedback", "Data analysis - impact analysis", "Visualizing Data", "Sharing - Report", "Conducting Surveys and Polls", "Searching (Filtering) Information- Query", "Data analysis", "Data modelling", "Reporting - Problem (Ticket System, etc)", "Reporting - via dashboards"], key="cat3_select")
-col5.multiselect("Product Design", ["Developing solution options", "Rating - solution options", "Assess feasibility", "Sharing - Designs", "Performing numerical analysis", "Designing - 3D Modells and Assemblies", "Rendering and Visualizing Products", "Simulating Designs", "Preparing Prototypes", "Integrating Designs with Manufacturing Processes", "Using AR/VR environments", "Customizing User Interface and Ease of Use", "Gathering and defining requirements", "Negotiate product development contract", "Prioritising requirements", "Tracing requirements", "Validating requirements (Align results with stakeholders)", "Writing Lasten-/Pflichtenheft", "Create system architecture", "Open and view Designs", "Providing Feedback", "Review - Status Updates (Approval, Revision…)", "Designing - 2D Models and Assemblies"], key="cat4_select")
+col2.multiselect("Communication", sorted(Category1Options), key="cat1_select")
+col3.multiselect("Data- & Knowledge Management", sorted(Category2Options), key="cat2_select")
+col4.multiselect("Project Management", sorted(Category3Options), key="cat3_select")
+col5.multiselect("Product Design", sorted(Category4Options), key="cat4_select")
 
 st.button("➕ Add", on_click=add_tool_callback)
 

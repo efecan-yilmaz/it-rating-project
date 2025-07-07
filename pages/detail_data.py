@@ -15,7 +15,8 @@ from data.SelectValues import (
     DigitalizationOptions,
     AILevelOptions,
     synchronizationOptions,
-    ColloborativeOptions
+    ColloborativeOptions,
+    PaymentMethodOptions
 )
 
 st.title("Tool Details Collection")
@@ -65,10 +66,11 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     combined_df['aiLevel'] = 'No'
     combined_df['synchronization'] = 'Ad-Hoc File Sharing'
     combined_df['colloborative'] = 'Not Collaborative'
+    combined_df['paymentMethod'] = 'Licensed'
 
     combined_df['tool'] = combined_df['tool'].fillna('')
 
-    final_df = combined_df[['category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative']]
+    final_df = combined_df[['category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', 'paymentMethod']]
 
     details_from_disk = details_df.copy()
 
@@ -104,6 +106,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
         "aiLevel": "AI Level",
         "synchronization": "synchronization",
         "colloborative": "Colloborative",
+        "paymentMethod": "Payment Method"
     }
 
     save_clicked = st.button("💾 Save Changes", type="primary")
@@ -137,6 +140,12 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
             options=ColloborativeOptions,
             required=True,
         )
+        editor_column_config["paymentMethod"] = st.column_config.SelectboxColumn(
+            "Payment Method",
+            help="Select the payment method of the tool",
+            options=PaymentMethodOptions,
+            required=True,
+        )
 
         edited_tools_df = st.data_editor(
             tools_display_df,
@@ -163,6 +172,12 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
             options=ColloborativeOptions,
             required=True,
         )
+        manual_tasks_editor_config["paymentMethod"] = st.column_config.SelectboxColumn(
+            "Payment Method",
+            help="Select the payment method of the tool",
+            options=PaymentMethodOptions,
+            required=True,
+        )
 
         edited_manual_tasks_df = st.data_editor(
             manual_tasks_display_df,
@@ -176,7 +191,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     # Save only when the button is clicked
     if save_clicked:
         df_to_save = pd.concat([edited_tools_df, edited_manual_tasks_df], ignore_index=True)
-        columns_to_save = ['category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative']
+        columns_to_save = ['category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', "paymentMethod"]
         df_to_save = df_to_save[columns_to_save]
         export_data_to_json(df_to_save, JSON_DETAILS_DATA_PATH)
         st.toast("Changes saved successfully!", icon="💾")
