@@ -6,6 +6,7 @@ JSON_MANUAL_TASKS_PATH = "data/manual_tasks_data.json"
 JSON_DETAILS_DATA_PATH = "data/details_data.json"
 JSON_RE_DETAILS_DATA_PATH = "data/re_details_data.json"
 JSON_PRIO_DATA_PATH = "data/priority_data.json"
+TEMPLATE_PATH = "data/METIS_VoC.xlsx"
 
 def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
     default_columns = ["Tool Name", "Category1", "Category2", "Category3", "Category4"]
