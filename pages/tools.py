@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import uuid
 from utils.utils import (JSON_FILE_PATH, load_tool_data_from_json, export_data_to_json)
 from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options)
 
@@ -35,12 +36,12 @@ def add_tool_callback():
         st.toast("Tool name cannot be empty.")
         return
 
-    # Require at least one category to be selected
     if not (category1 or category2 or category3 or category4):
         st.toast("Please select at least one category.")
         return
 
     new_row = {
+        "ID": str(uuid.uuid4()),  # Add unique ID
         "Tool Name": tool_name,
         "Category1": category1,
         "Category2": category2,
@@ -94,6 +95,7 @@ else:
         on_select=on_table_selection,
         key="tool_data_df_edit",
         column_config={
+            "ID": None,  # Hide the ID column
             "Category1": st.column_config.ListColumn("Communication"),
             "Category2": st.column_config.ListColumn("Data- & Knowledge Management"),
             "Category3": st.column_config.ListColumn("Project Management"),
@@ -117,7 +119,7 @@ def group_tools_by_category(df):
             values = row[cat_col]
             if isinstance(values, list):
                 for v in values:
-                    grouped[cat_name].setdefault(v, []).append(tool_name)
+                    grouped[cat_name].setdefault(v, []).append(tool_name)  # Only tool name
     return grouped
 
 def create_fishbone_diagram_grouped(df):

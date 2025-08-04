@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import uuid
 
 from utils.utils import (
     JSON_FILE_PATH,
@@ -60,34 +61,28 @@ else:
 if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     combined_df = pd.concat([processed_tools_df, processed_manual_tasks_df], ignore_index=True)
 
+    # Add unique IDs for each record
+    combined_df['id'] = [str(uuid.uuid4()) for _ in range(len(combined_df))]
+
     combined_df['digitalization'] = 'Automated'  # Default for tools
-    # For manual tasks (where tool is 'None'), set digitalization to 'Manual'
     combined_df.loc[combined_df['tool'] == 'None', 'digitalization'] = 'Manual'
     combined_df['aiLevel'] = 'No'
     combined_df['synchronization'] = 'Ad-Hoc File Sharing'
     combined_df['colloborative'] = 'Not Collaborative'
     combined_df['paymentMethod'] = 'Licensed'
-
     combined_df['tool'] = combined_df['tool'].fillna('')
 
-    final_df = combined_df[['category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', 'paymentMethod']]
+    final_df = combined_df[['id', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', 'paymentMethod']]
 
     details_from_disk = details_df.copy()
 
     # Merge with existing details data if it exists
     if not details_from_disk.empty:
-        # Use category and tool as index for easy updating
         final_df.set_index(['category', 'tool'], inplace=True)
-        # Ensure the loaded details_df has the same index
         details_from_disk.set_index(['category', 'tool'], inplace=True)
-        # Update final_df with the values from details_df
         final_df.update(details_from_disk)
-        # Reset index to get columns back
         final_df.reset_index(inplace=True)
 
-    # On first load, check if the generated data (with merged details) is different
-    # from what's on disk. If so, save it to sync new/deleted tools. This happens
-    # silently to ensure the details file is always up-to-date.
     cols = sorted(final_df.columns.tolist())
     final_df_sorted = final_df[cols].sort_values(by=['category', 'tool']).reset_index(drop=True)
     details_df_sorted = details_df[cols].sort_values(by=['category', 'tool']).reset_index(drop=True) if not details_df.empty else pd.DataFrame(columns=cols)
@@ -95,9 +90,8 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     if not final_df_sorted.equals(details_df_sorted):
         export_data_to_json(final_df, JSON_DETAILS_DATA_PATH)
 
-    # Split the dataframe into tools and manual tasks for separate display
-    tools_display_df = final_df[final_df['tool'] != 'None'].reset_index(drop=True)
-    manual_tasks_display_df = final_df[final_df['tool'] == 'None'].reset_index(drop=True)
+    tools_display_df = final_df[final_df['tool'] != 'None'].drop(columns=['id']).reset_index(drop=True)
+    manual_tasks_display_df = final_df[final_df['tool'] == 'None'].drop(columns=['id']).reset_index(drop=True)
 
     column_config = {
         "category": "Collaborative Activities",
@@ -114,7 +108,6 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     # Display editable table for tools
     if not tools_display_df.empty:
         st.subheader("Tool Details")
-        # Update the column config specifically for the editor's selectbox
         editor_column_config = column_config.copy()
         editor_column_config["digitalization"] = st.column_config.SelectboxColumn(
             "Digitalization",
@@ -151,7 +144,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
             tools_display_df,
             use_container_width=True,
             column_config=editor_column_config,
-            disabled=["category", "tool"], # Prevent editing of derived columns
+            disabled=["category", "tool"], # "id" is not present
             hide_index=True,
             key="tool_details_editor"
         )
@@ -183,15 +176,28 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
             manual_tasks_display_df,
             use_container_width=True,
             column_config=manual_tasks_editor_config,
-            disabled=["category", "tool", "digitalization", "aiLevel"],
+            disabled=["category", "tool", "digitalization", "aiLevel"], # "id" is not present
             hide_index=True,
             key="manual_tasks_editor"
         )
 
-    # Save only when the button is clicked
+    # When saving, merge the edited data back with the original DataFrame (with 'id')
     if save_clicked:
-        df_to_save = pd.concat([edited_tools_df, edited_manual_tasks_df], ignore_index=True)
-        columns_to_save = ['category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', "paymentMethod"]
+        # Re-attach the 'id' column before saving
+        # You need to match rows by 'category' and 'tool'
+        def merge_with_id(edited_df, original_df):
+            return pd.merge(
+                original_df[['id', 'category', 'tool']],
+                edited_df,
+                on=['category', 'tool'],
+                how='right'
+            )
+
+        edited_tools_with_id = merge_with_id(edited_tools_df, final_df[final_df['tool'] != 'None'])
+        edited_manual_tasks_with_id = merge_with_id(edited_manual_tasks_df, final_df[final_df['tool'] == 'None'])
+
+        df_to_save = pd.concat([edited_tools_with_id, edited_manual_tasks_with_id], ignore_index=True)
+        columns_to_save = ['id', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', "paymentMethod"]
         df_to_save = df_to_save[columns_to_save]
         export_data_to_json(df_to_save, JSON_DETAILS_DATA_PATH)
         st.toast("Changes saved successfully!", icon="💾")

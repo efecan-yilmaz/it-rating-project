@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import uuid  # <-- Add this import
 from utils.utils import JSON_MANUAL_TASKS_PATH, load_manual_task_data_from_json, export_data_to_json
 from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options)
 
@@ -38,7 +39,11 @@ def add_manual_task_callback():
                 ].empty
             )
             if not is_duplicate:
-                new_rows.append({"CategoryGroup": group, "CategoryName": selected})
+                new_rows.append({
+                    "ID": str(uuid.uuid4()),
+                    "CategoryGroup": group,
+                    "CategoryName": selected
+                })
 
     if new_rows:
         new_row_df = pd.DataFrame(new_rows)
@@ -75,7 +80,7 @@ if st.session_state.manual_task_df.empty:
 else:
     st.button("🗑️ Delete Selected", on_click=delete_from_table)
     st.dataframe(
-        st.session_state.manual_task_df,
+        st.session_state.manual_task_df[["CategoryGroup", "CategoryName"]],
         selection_mode="multi-row",
         on_select=on_table_selection,
         key="manual_task_df_edit",
