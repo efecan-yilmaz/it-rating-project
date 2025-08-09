@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import uuid
+import os
 from utils.utils import (JSON_FILE_PATH, load_tool_data_from_json, export_data_to_json, JSON_PRIO_DATA_PATH, export_data_to_json)
 from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options, UseCaseOptions, PaymentMethodOptions)
 from utils.process_locator import determine_page
@@ -285,6 +286,10 @@ if 'tool_data_df' in st.session_state and not st.session_state.tool_data_df.empt
     st.plotly_chart(fishbone_fig, use_container_width=True)
 else:
     st.info("Add tools to see the fishbone diagram.")
+    
+next_step_enabled = os.path.exists(JSON_PRIO_DATA_PATH)
+if not next_step_enabled:
+    st.warning("Please complete the Prioritization of Requirement before proceeding to the next step.")
 
-if st.button("➡️ Next step"):
+if st.button("➡️ Next step", disabled=not next_step_enabled):
     st.switch_page("pages/manual_tasks.py")

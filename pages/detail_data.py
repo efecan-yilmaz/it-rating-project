@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import uuid
+import os
 
 from utils.utils import (
     JSON_FILE_PATH,
@@ -210,5 +211,6 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
 else:
     st.info("No tools or manual tasks found. Please add them in Step 1 and Step 2.")
 
-if st.button("➡️ Next step"):
+next_step_enabled = os.path.exists(JSON_DETAILS_DATA_PATH)
+if st.button("➡️ Next step", disabled=not next_step_enabled):
     st.switch_page("pages/user_ratings.py")

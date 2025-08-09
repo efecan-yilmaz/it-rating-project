@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import uuid  # <-- Add this import
+import uuid
+import os
 from utils.utils import JSON_MANUAL_TASKS_PATH, load_manual_task_data_from_json, export_data_to_json
 from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options)
 
@@ -91,5 +92,9 @@ else:
         use_container_width=True
     )
 
-if st.button("➡️ Next step"):
+next_step_enabled = os.path.exists(JSON_MANUAL_TASKS_PATH)
+if not next_step_enabled:
+    st.warning("Please complete Manual Tasks Data Collection before proceeding to the next step.")
+
+if st.button("➡️ Next step", disabled=not next_step_enabled):
     st.switch_page("pages/detail_data.py")

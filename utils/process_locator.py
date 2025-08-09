@@ -1,9 +1,13 @@
-from utils.utils import (JSON_MANUAL_TASKS_PATH, JSON_DETAILS_DATA_PATH)
+from utils.utils import (JSON_MANUAL_TASKS_PATH, JSON_DETAILS_DATA_PATH, JSON_USER_RATINGS_PATH, JSON_RE_DETAILS_DATA_PATH)
 import os
 import streamlit.components.v1 as components
 
 def determine_page():
-    if os.path.exists(JSON_DETAILS_DATA_PATH):
+    if os.path.exists(JSON_RE_DETAILS_DATA_PATH):
+        return "pages/requirement_engineering.py"
+    elif os.path.exists(JSON_USER_RATINGS_PATH):
+        return "pages/user_ratings.py"
+    elif os.path.exists(JSON_DETAILS_DATA_PATH):
         return "pages/detail_data.py"
     elif os.path.exists(JSON_MANUAL_TASKS_PATH):
         return "pages/manual_tasks.py"
