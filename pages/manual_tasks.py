@@ -90,3 +90,6 @@ else:
         },
         use_container_width=True
     )
+
+if st.button("➡️ Next step"):
+    st.switch_page("pages/detail_data.py")

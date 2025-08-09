@@ -209,3 +209,6 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
         st.rerun()
 else:
     st.info("No tools or manual tasks found. Please add them in Step 1 and Step 2.")
+
+if st.button("➡️ Next step"):
+    st.switch_page("pages/user_ratings.py")

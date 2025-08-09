@@ -4,6 +4,14 @@ import plotly.graph_objects as go
 import uuid
 from utils.utils import (JSON_FILE_PATH, load_tool_data_from_json, export_data_to_json, JSON_PRIO_DATA_PATH, export_data_to_json)
 from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options, UseCaseOptions, PaymentMethodOptions)
+from utils.process_locator import determine_page
+
+def run_redirect():
+    redirected_page = determine_page()
+    if redirected_page and redirected_page != "pages/tools.py":
+        st.switch_page(redirected_page)
+
+run_redirect()
 
 # Initialize the DataFrame in session state if it doesn't exist
 if 'tool_data_df' not in st.session_state:
@@ -277,3 +285,6 @@ if 'tool_data_df' in st.session_state and not st.session_state.tool_data_df.empt
     st.plotly_chart(fishbone_fig, use_container_width=True)
 else:
     st.info("Add tools to see the fishbone diagram.")
+
+if st.button("➡️ Next step"):
+    st.switch_page("pages/manual_tasks.py")

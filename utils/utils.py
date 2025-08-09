@@ -4,7 +4,7 @@ import streamlit as st
 JSON_FILE_PATH = "data/tool_data.json"
 JSON_MANUAL_TASKS_PATH = "data/manual_tasks_data.json"
 JSON_DETAILS_DATA_PATH = "data/details_data.json"
-JSON_RE_DETAILS_DATA_PATH = "data/details_data.json"
+JSON_RE_DETAILS_DATA_PATH = "data/re_details_data.json"
 JSON_PRIO_DATA_PATH = "data/priority_data.json"
 JSON_USER_RATINGS_PATH = "data/user_ratings.json"
 TEMPLATE_PATH = "data/METIS_VoC.xlsx"
