@@ -10,11 +10,10 @@ pages = {
     "Step 3:": [st.Page("pages/detail_data.py", title="Tool Details Collection")],
     "Step 4:": [st.Page("pages/user_ratings.py", title="User Ratings Collection")],
     "Step 5:": [st.Page("pages/requirement_engineering.py", title="Requirement Engineering")],
-    "Step 6:": [st.Page("pages/proiritazion.py", title="Prioritization of Requirement")],
-    "Step 7:": [st.Page("pages/requirement.py", title="Desigin Recommendation")],
-    "Step 8:": [st.Page("pages/updated_tool_stack.py", title="Updated Tool Stack")],
-    "Step 9:": [st.Page("pages/define_kpi.py", title="Define KPI")],
-    "Step 10": [st.Page("pages/measurement.py", title="Measurement")],
+    "Step 6:": [st.Page("pages/requirement.py", title="Desigin Recommendation")],
+    "Step 7:": [st.Page("pages/updated_tool_stack.py", title="Updated Tool Stack")],
+    "Step 8:": [st.Page("pages/define_kpi.py", title="Define KPI")],
+    "Step 9": [st.Page("pages/measurement.py", title="Measurement")],
     "Dashboard": [st.Page("pages/dashboard.py", title="Dashboard")]
 }
 

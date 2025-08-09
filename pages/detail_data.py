@@ -32,7 +32,7 @@ if not tool_df.empty:
     # Reshape the dataframe from wide to long format, creating a row for each tool/category-list pair
     melted_df = pd.melt(
         tool_df,
-        id_vars=['Tool Name'],
+        id_vars=['Tool Name', 'ID'],
         value_vars=['Category1', 'Category2', 'Category3', 'Category4'],
         value_name='category'
     )
@@ -41,21 +41,24 @@ if not tool_df.empty:
     exploded_df = melted_df.explode('category')
 
     # Select and rename columns
-    processed_tools_df = exploded_df[['Tool Name', 'category']].rename(columns={'Tool Name': 'tool'})
+    processed_tools_df = exploded_df[['Tool Name', 'category', 'ID']].rename(
+        columns={'Tool Name': 'tool', 'ID': 'base_tool_id'}
+    )
 
     # Remove rows where category might be an empty string or NaN
     processed_tools_df.dropna(subset=['category'], inplace=True)
     processed_tools_df = processed_tools_df[processed_tools_df['category'] != '']
 else:
-    processed_tools_df = pd.DataFrame(columns=['tool', 'category'])
+    processed_tools_df = pd.DataFrame(columns=['tool', 'category', 'base_tool_id'])
 
 if not manual_task_df.empty:
     # For manual tasks, the task name becomes the category, and the tool is 'None'.
     processed_manual_tasks_df = pd.DataFrame()
     processed_manual_tasks_df['category'] = manual_task_df['CategoryName']
     processed_manual_tasks_df['tool'] = 'None'
+    processed_manual_tasks_df['base_tool_id'] = manual_task_df['ID']
 else:
-    processed_manual_tasks_df = pd.DataFrame(columns=['tool', 'category'])
+    processed_manual_tasks_df = pd.DataFrame(columns=['tool', 'category', 'base_tool_id'])
 
 # Combine the two dataframes
 if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
@@ -72,7 +75,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     combined_df['paymentMethod'] = 'Licensed'
     combined_df['tool'] = combined_df['tool'].fillna('')
 
-    final_df = combined_df[['id', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', 'paymentMethod']]
+    final_df = combined_df[['id', 'category', 'tool', 'base_tool_id', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', 'paymentMethod']]
 
     details_from_disk = details_df.copy()
 
@@ -90,8 +93,10 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
     if not final_df_sorted.equals(details_df_sorted):
         export_data_to_json(final_df, JSON_DETAILS_DATA_PATH)
 
-    tools_display_df = final_df[final_df['tool'] != 'None'].drop(columns=['id']).reset_index(drop=True)
-    manual_tasks_display_df = final_df[final_df['tool'] == 'None'].drop(columns=['id']).reset_index(drop=True)
+    # Don't show 'base_tool_id' in tables
+    display_columns = [c for c in final_df.columns if c not in ['id', 'base_tool_id']]
+    tools_display_df = final_df[final_df['tool'] != 'None'][display_columns].reset_index(drop=True)
+    manual_tasks_display_df = final_df[final_df['tool'] == 'None'][display_columns].reset_index(drop=True)
 
     column_config = {
         "category": "Collaborative Activities",
@@ -187,7 +192,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
         # You need to match rows by 'category' and 'tool'
         def merge_with_id(edited_df, original_df):
             return pd.merge(
-                original_df[['id', 'category', 'tool']],
+                original_df[['id', 'category', 'tool', 'base_tool_id']],
                 edited_df,
                 on=['category', 'tool'],
                 how='right'
@@ -197,7 +202,7 @@ if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
         edited_manual_tasks_with_id = merge_with_id(edited_manual_tasks_df, final_df[final_df['tool'] == 'None'])
 
         df_to_save = pd.concat([edited_tools_with_id, edited_manual_tasks_with_id], ignore_index=True)
-        columns_to_save = ['id', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', "paymentMethod"]
+        columns_to_save = ['id', 'category', 'tool', 'base_tool_id', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', "paymentMethod"]
         df_to_save = df_to_save[columns_to_save]
         export_data_to_json(df_to_save, JSON_DETAILS_DATA_PATH)
         st.toast("Changes saved successfully!", icon="💾")

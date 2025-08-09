@@ -4,13 +4,13 @@ import streamlit as st
 JSON_FILE_PATH = "data/tool_data.json"
 JSON_MANUAL_TASKS_PATH = "data/manual_tasks_data.json"
 JSON_DETAILS_DATA_PATH = "data/details_data.json"
-JSON_RE_DETAILS_DATA_PATH = "data/re_details_data.json"
+JSON_RE_DETAILS_DATA_PATH = "data/details_data.json"
 JSON_PRIO_DATA_PATH = "data/priority_data.json"
 JSON_USER_RATINGS_PATH = "data/user_ratings.json"
 TEMPLATE_PATH = "data/METIS_VoC.xlsx"
 
 def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
-    default_columns = ["Tool Name", "Category1", "Category2", "Category3", "Category4"]
+    default_columns = ["Tool Name", "ID", "Category1", "Category2", "Category3", "Category4"]
     try:
         df = pd.read_json(file_path, orient='records', dtype=False)
         # Ensure all necessary columns exist, add them if they don't
@@ -20,7 +20,7 @@ def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
         # Ensure correct column order and fill NaNs appropriately
         df = df.reindex(columns=default_columns)
         for col in ["Category1", "Category2", "Category3", "Category4"]:
-             # Ensure category columns are lists, handling potential NaNs from reindex or initial load
+            # Ensure category columns are lists, handling potential NaNs from reindex or initial load
             df[col] = df[col].apply(lambda x: x if isinstance(x, list) else ([] if pd.isna(x) else [x]))
         return df
     except FileNotFoundError:
@@ -34,7 +34,7 @@ def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
         return pd.DataFrame(columns=default_columns)
 
 def load_manual_task_data_from_json(file_path: str) -> pd.DataFrame:
-    default_columns = ["CategoryGroup", "CategoryName"]
+    default_columns = ["CategoryGroup", "CategoryName", "ID"]
     try:
         df = pd.read_json(file_path, orient="records", dtype=False)
         for col in default_columns:
