@@ -7,6 +7,10 @@ import json
 import os
 import uuid
 
+from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
+
+run_redirect(Page.USER_RATINGS.value)
+
 st.title("User Ratings Collection")
 
 details_df = load_details_data_from_json(JSON_DETAILS_DATA_PATH)
@@ -118,5 +122,13 @@ next_step_enabled = os.path.exists(JSON_USER_RATINGS_PATH)
 if not next_step_enabled:
     st.warning("Please complete User Ratings Collection before proceeding to the next step.")
 
-if st.button("➡️ Next step", disabled=not next_step_enabled):
-    st.switch_page("pages/requirement_engineering.py")
+col_prev_next = st.columns([0.5, 0.5])
+with col_prev_next[0]:
+    if st.button("⬅️ Previous step"):
+        save_current_page(Page.DETAIL_DATA)
+        clean_for_previous_direction(Page.USER_RATINGS)
+        st.switch_page(Page.DETAIL_DATA.value)
+with col_prev_next[1]:
+    if st.button("➡️ Next step", disabled=not next_step_enabled):
+        save_current_page(Page.REQUIREMENT_ENGINEERING)
+        st.switch_page(Page.REQUIREMENT_ENGINEERING.value)

@@ -21,6 +21,10 @@ from data.SelectValues import (
     PaymentMethodOptions
 )
 
+from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
+
+run_redirect(Page.DETAIL_DATA.value)
+
 st.title("Tool Details Collection")
 st.write("Please select details for entered tools. Double click to edit the value in the column.")
 
@@ -212,5 +216,13 @@ else:
     st.info("No tools or manual tasks found. Please add them in Step 1 and Step 2.")
 
 next_step_enabled = os.path.exists(JSON_DETAILS_DATA_PATH)
-if st.button("➡️ Next step", disabled=not next_step_enabled):
-    st.switch_page("pages/user_ratings.py")
+col_prev_next = st.columns([0.5, 0.5])
+with col_prev_next[0]:
+    if st.button("⬅️ Previous step"):
+        save_current_page(Page.MANUAL_TASKS)
+        clean_for_previous_direction(Page.DETAIL_DATA)
+        st.switch_page(Page.MANUAL_TASKS.value)
+with col_prev_next[1]:
+    if st.button("➡️ Next step", disabled=not next_step_enabled):
+        save_current_page(Page.USER_RATINGS)
+        st.switch_page(Page.USER_RATINGS.value)

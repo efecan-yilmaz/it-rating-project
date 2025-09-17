@@ -4,6 +4,9 @@ import uuid
 import os
 from utils.utils import JSON_MANUAL_TASKS_PATH, load_manual_task_data_from_json, export_data_to_json
 from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options)
+from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
+
+run_redirect(Page.MANUAL_TASKS.value)
 
 CATEGORY_OPTIONS = {
     "Communication": sorted(Category1Options),
@@ -13,7 +16,7 @@ CATEGORY_OPTIONS = {
 }
 
 # Initialize the DataFrame in session state if it doesn't exist
-if 'manual_task_df' not in st.session_state:
+if 'manual_task_df' not in st.session_state or not os.path.exists(JSON_MANUAL_TASKS_PATH):
     st.session_state.manual_task_df = load_manual_task_data_from_json(JSON_MANUAL_TASKS_PATH)
 
 # Initialize category selections in session state
@@ -96,5 +99,13 @@ next_step_enabled = os.path.exists(JSON_MANUAL_TASKS_PATH)
 if not next_step_enabled:
     st.warning("Please complete Manual Tasks Data Collection before proceeding to the next step.")
 
-if st.button("➡️ Next step", disabled=not next_step_enabled):
-    st.switch_page("pages/detail_data.py")
+col_prev_next = st.columns([0.5, 0.5])
+with col_prev_next[0]:
+    if st.button("⬅️ Previous step"):
+        save_current_page(Page.TOOLS)
+        clean_for_previous_direction(Page.MANUAL_TASKS)
+        st.switch_page(Page.TOOLS.value)
+with col_prev_next[1]:
+    if st.button("➡️ Next step", disabled=not next_step_enabled):
+        save_current_page(Page.DETAIL_DATA)
+        st.switch_page(Page.DETAIL_DATA.value)

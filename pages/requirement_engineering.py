@@ -22,6 +22,10 @@ from data.SelectValues import (
     NeedForChangeOptions
 )
 
+from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
+
+run_redirect(Page.REQUIREMENT_ENGINEERING.value)
+
 st.title("Requirement Engineering")
 st.write("Please asign them relevant 'Need for Change' values.")
 st.write("You can also change the values of the tools and manual tasks you have entered in the previous steps to emphasize what you expect them in the future.")
@@ -201,5 +205,14 @@ else:
     st.info("No details data available. Please complete the previous steps first.")
 
 next_step_enabled = os.path.exists(JSON_RE_DETAILS_DATA_PATH)
-if st.button("➡️ Next step", disabled=not next_step_enabled):
-    st.switch_page("pages/requirement.py")
+
+col_prev_next = st.columns([0.5, 0.5])
+with col_prev_next[0]:
+    if st.button("⬅️ Previous step"):
+        save_current_page(Page.USER_RATINGS)
+        clean_for_previous_direction(Page.REQUIREMENT_ENGINEERING)
+        st.switch_page(Page.USER_RATINGS.value)
+with col_prev_next[1]:
+    if st.button("➡️ Next step", disabled=not next_step_enabled):
+        save_current_page(Page.REQUIREMENT)
+        st.switch_page(Page.REQUIREMENT.value)
