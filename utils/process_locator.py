@@ -39,13 +39,13 @@ def determine_page():
         else:
             save_current_page(Page.MANUAL_TASKS)
             return current_page
-    elif current_page == Page.DETAIL_DATA.value:
-        if not os.path.exists(JSON_PRIO_DATA_PATH):
-            save_current_page(Page.TOOLS)
-            return Page.TOOLS.value
-        else:
-            save_current_page(Page.DETAIL_DATA)
-            return current_page
+    # elif current_page == Page.DETAIL_DATA.value:
+    #     if not os.path.exists(JSON_PRIO_DATA_PATH):
+    #         save_current_page(Page.TOOLS)
+    #         return Page.TOOLS.value
+    #     else:
+    #         save_current_page(Page.DETAIL_DATA)
+    #         return current_page
     elif current_page == Page.USER_RATINGS.value:
         if not os.path.exists(JSON_DETAILS_DATA_PATH):
             save_current_page(Page.DETAIL_DATA)
@@ -72,9 +72,11 @@ def clean_for_previous_direction(page: Page):
     if page == Page.MANUAL_TASKS:
         if os.path.exists(JSON_MANUAL_TASKS_PATH):
             os.remove(JSON_MANUAL_TASKS_PATH)
-    elif page == Page.DETAIL_DATA:
         if os.path.exists(JSON_DETAILS_DATA_PATH):
             os.remove(JSON_DETAILS_DATA_PATH)
+    # elif page == Page.DETAIL_DATA:
+    #     if os.path.exists(JSON_DETAILS_DATA_PATH):
+    #         os.remove(JSON_DETAILS_DATA_PATH)
     elif page == Page.USER_RATINGS:
         if os.path.exists(JSON_USER_RATINGS_PATH):
             os.remove(JSON_USER_RATINGS_PATH)

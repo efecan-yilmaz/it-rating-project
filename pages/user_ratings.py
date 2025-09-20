@@ -125,9 +125,9 @@ if not next_step_enabled:
 col_prev_next = st.columns([0.5, 0.5])
 with col_prev_next[0]:
     if st.button("⬅️ Previous step"):
-        save_current_page(Page.DETAIL_DATA)
+        save_current_page(Page.MANUAL_TASKS)
         clean_for_previous_direction(Page.USER_RATINGS)
-        st.switch_page(Page.DETAIL_DATA.value)
+        st.switch_page(Page.MANUAL_TASKS.value)
 with col_prev_next[1]:
     if st.button("➡️ Next step", disabled=not next_step_enabled):
         save_current_page(Page.REQUIREMENT_ENGINEERING)

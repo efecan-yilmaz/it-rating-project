@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import uuid
 import os
-from utils.utils import JSON_MANUAL_TASKS_PATH, load_manual_task_data_from_json, export_data_to_json
+from utils.utils import JSON_MANUAL_TASKS_PATH, load_manual_task_data_from_json, export_data_to_json, JSON_DETAILS_DATA_PATH, load_details_data_from_json, JSON_FILE_PATH, load_tool_data_from_json
 from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options)
 from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
 
@@ -107,5 +107,87 @@ with col_prev_next[0]:
         st.switch_page(Page.TOOLS.value)
 with col_prev_next[1]:
     if st.button("➡️ Next step", disabled=not next_step_enabled):
-        save_current_page(Page.DETAIL_DATA)
-        st.switch_page(Page.DETAIL_DATA.value)
+        if  os.path.exists(JSON_DETAILS_DATA_PATH):
+            os.remove(JSON_DETAILS_DATA_PATH)
+        
+        ## step for details data is cancelled
+        ## going directly to user ratings step
+        ## create the same file like details data to support the flow
+
+        # Load data
+        details_df = load_details_data_from_json(JSON_DETAILS_DATA_PATH)
+        tool_df = load_tool_data_from_json(JSON_FILE_PATH)
+        manual_task_df = load_manual_task_data_from_json(JSON_MANUAL_TASKS_PATH)
+
+        if not tool_df.empty:
+            # Reshape the dataframe from wide to long format, creating a row for each tool/category-list pair
+            melted_df = pd.melt(
+                tool_df,
+                id_vars=['Tool Name', 'ID'],
+                value_vars=['Category1', 'Category2', 'Category3', 'Category4'],
+                value_name='category'
+            )
+
+            # Explode the lists in the 'category' column to create a row for each individual category item
+            exploded_df = melted_df.explode('category')
+
+            # Select and rename columns
+            processed_tools_df = exploded_df[['Tool Name', 'category', 'ID']].rename(
+                columns={'Tool Name': 'tool', 'ID': 'base_tool_id'}
+            )
+
+            # Remove rows where category might be an empty string or NaN
+            processed_tools_df.dropna(subset=['category'], inplace=True)
+            processed_tools_df = processed_tools_df[processed_tools_df['category'] != '']
+        else:
+            processed_tools_df = pd.DataFrame(columns=['tool', 'category', 'base_tool_id'])
+
+        if not manual_task_df.empty:
+            # For manual tasks, the task name becomes the category, and the tool is 'None'.
+            processed_manual_tasks_df = pd.DataFrame()
+            processed_manual_tasks_df['category'] = manual_task_df['CategoryName']
+            processed_manual_tasks_df['tool'] = 'None'
+            processed_manual_tasks_df['base_tool_id'] = manual_task_df['ID']
+        else:
+            processed_manual_tasks_df = pd.DataFrame(columns=['tool', 'category', 'base_tool_id'])
+
+        # Combine the two dataframes
+        if not processed_tools_df.empty or not processed_manual_tasks_df.empty:
+            combined_df = pd.concat([processed_tools_df, processed_manual_tasks_df], ignore_index=True)
+
+            # Add unique IDs for each record
+            combined_df['id'] = [str(uuid.uuid4()) for _ in range(len(combined_df))]
+
+            combined_df['digitalization'] = 'Automated'  # Default for tools
+            combined_df.loc[combined_df['tool'] == 'None', 'digitalization'] = 'Manual'
+            combined_df['aiLevel'] = 'No'
+            combined_df['synchronization'] = 'Ad-Hoc File Sharing'
+            combined_df['colloborative'] = 'Not Collaborative'
+            combined_df['paymentMethod'] = 'Licensed'
+            combined_df['tool'] = combined_df['tool'].fillna('')
+
+            final_df = combined_df[['id', 'category', 'tool', 'base_tool_id', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', 'paymentMethod']]
+
+            details_from_disk = details_df.copy()
+
+            # Merge with existing details data if it exists
+            if not details_from_disk.empty:
+                final_df.set_index(['category', 'tool'], inplace=True)
+                details_from_disk.set_index(['category', 'tool'], inplace=True)
+                final_df.update(details_from_disk)
+                final_df.reset_index(inplace=True)
+
+            cols = sorted(final_df.columns.tolist())
+            final_df_sorted = final_df[cols].sort_values(by=['category', 'tool']).reset_index(drop=True)
+            details_df_sorted = details_df[cols].sort_values(by=['category', 'tool']).reset_index(drop=True) if not details_df.empty else pd.DataFrame(columns=cols)
+
+            if not final_df_sorted.equals(details_df_sorted):
+                export_data_to_json(final_df, JSON_DETAILS_DATA_PATH)
+
+            # df_to_save = pd.concat([edited_tools_with_id, edited_manual_tasks_with_id], ignore_index=True)
+            # columns_to_save = ['id', 'category', 'tool', 'base_tool_id', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', "paymentMethod"]
+            # df_to_save = df_to_save[columns_to_save]
+            # export_data_to_json(df_to_save, JSON_DETAILS_DATA_PATH)
+
+        save_current_page(Page.USER_RATINGS)
+        st.switch_page(Page.USER_RATINGS.value)
