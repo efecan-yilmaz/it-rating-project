@@ -62,6 +62,12 @@ def determine_page():
             return Page.USER_RATINGS.value
         else:
             return current_page
+    elif current_page == Page.REQUIREMENT.value:
+        if not os.path.exists(JSON_RE_DETAILS_DATA_PATH):
+            save_current_page(Page.REQUIREMENT_ENGINEERING)
+            return Page.REQUIREMENT_ENGINEERING.value
+        else:
+            return current_page
 
 def run_redirect(default_page=Page.TOOLS.value):
     redirected_page = determine_page()
