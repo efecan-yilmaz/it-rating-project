@@ -28,7 +28,7 @@ run_redirect(Page.REQUIREMENT_ENGINEERING.value)
 
 st.title("Requirement Engineering")
 st.write("Please asign them relevant 'Need for Change' values.")
-st.write("You can also change the values of the tools and manual tasks you have entered in the previous steps to emphasize what you expect them in the future.")
+st.write("Please assign other values for the tools to reflect your necessities.")
 
 def calculate_voe_from_user_ratings(details_df, user_ratings_path):
     # Load user ratings
@@ -72,13 +72,13 @@ if os.path.exists(JSON_RE_DETAILS_DATA_PATH):
     # Add new entries with default values
     if not new_entries.empty:
         new_entries = new_entries.copy()
-        new_entries['needForChange'] = new_entries['digitalization'].apply(lambda x: "Can" if x == "Manual" else "Won't")
+        new_entries['needForChange'] = new_entries['digitalization'].apply(lambda x: "Nice to change" if x == "Manual" else "No need to change")
         new_entries['voe'] = calculate_voe_from_user_ratings(new_entries, JSON_USER_RATINGS_PATH)
         merged = pd.concat([merged, new_entries], ignore_index=True)
 else:
     # If KPI details file doesn't exist, use all details data with default values
     merged = details_df.copy()
-    merged['needForChange'] = merged['digitalization'].apply(lambda x: "Can" if x == "Manual" else "Won't")
+    merged['needForChange'] = merged['digitalization'].apply(lambda x: "Nice to change" if x == "Manual" else "No need to change")
     merged['voe'] = calculate_voe_from_user_ratings(merged, JSON_USER_RATINGS_PATH)
 
 # Save merged to file and session state for editing
@@ -105,12 +105,12 @@ if not merged.empty:
     edited_manual_tasks_df = st.session_state['edited_manual_tasks_df']
 
     column_config = {
-        "category": "Collaborative Activities",
+        "category": "Activities",
         "tool": "Tool",
         "digitalization": "Digitalization",
         "aiLevel": "AI Level",
-        "synchronization": "synchronization",
-        "colloborative": "Colloborative",
+        "synchronization": "Synchronization",
+        #"colloborative": "Colloborative",
         "needForChange": st.column_config.SelectboxColumn(label="Need For Change", options=NeedForChangeOptions),
         "voe": st.column_config.NumberColumn(label="VoE", format="%.1f", min_value=1.0, max_value=10),
     }
@@ -120,7 +120,7 @@ if not merged.empty:
         st.subheader("Tool Details")
         tools_display_cols = [
             'needForChange', 'voe',
-            'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative'
+            'category', 'tool', 'digitalization', 'aiLevel', 'synchronization'#, 'colloborative'
         ]
         edited_tools_df = edited_tools_df[tools_display_cols]
 
@@ -138,17 +138,17 @@ if not merged.empty:
             required=True,
         )
         editor_column_config["synchronization"] = st.column_config.SelectboxColumn(
-            "synchronization",
+            "Synchronization",
             help="Select the synchronization of the tool",
             options=synchronizationOptions,
             required=True,
         )
-        editor_column_config["colloborative"] = st.column_config.SelectboxColumn(
-            "Colloborative",
-            help="Select if the tool is collaborative",
-            options=ColloborativeOptions,
-            required=True,
-        )
+        # editor_column_config["colloborative"] = st.column_config.SelectboxColumn(
+        #     "Colloborative",
+        #     help="Select if the tool is collaborative",
+        #     options=ColloborativeOptions,
+        #     required=True,
+        # )
 
         edited_tools_df = st.data_editor(
             edited_tools_df,
@@ -164,23 +164,23 @@ if not merged.empty:
         st.subheader("Manual Tasks")
         manual_tasks_display_cols = [
             'needForChange', 'voe',
-            'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative'
+            'category', 'tool', 'digitalization', 'aiLevel', 'synchronization'#, 'colloborative'
         ]
         edited_manual_tasks_df = edited_manual_tasks_df[manual_tasks_display_cols]
 
         manual_tasks_editor_config = column_config.copy()
         manual_tasks_editor_config["synchronization"] = st.column_config.SelectboxColumn(
-            "synchronization",
+            "Synchronization",
             help="Select the synchronization of the manual task",
             options=synchronizationOptions,
             required=True,
         )
-        manual_tasks_editor_config["colloborative"] = st.column_config.SelectboxColumn(
-            "Colloborative",
-            help="Select if the manual task is collaborative",
-            options=ColloborativeOptions,
-            required=True,
-        )
+        # manual_tasks_editor_config["colloborative"] = st.column_config.SelectboxColumn(
+        #     "Colloborative",
+        #     help="Select if the manual task is collaborative",
+        #     options=ColloborativeOptions,
+        #     required=True,
+        # )
 
         edited_manual_tasks_df = st.data_editor(
             edited_manual_tasks_df,
@@ -196,7 +196,7 @@ if not merged.empty:
         st.session_state['edited_tools_df'] = edited_tools_df
         st.session_state['edited_manual_tasks_df'] = edited_manual_tasks_df
         df_to_save = pd.concat([edited_tools_df, edited_manual_tasks_df], ignore_index=True)
-        columns_to_save = ['needForChange', 'voe', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'colloborative']
+        columns_to_save = ['needForChange', 'voe', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization']#, 'colloborative']
         df_to_save = df_to_save[columns_to_save]
         export_data_to_json(df_to_save, JSON_RE_DETAILS_DATA_PATH)
         st.toast("Changes saved successfully!", icon="💾")
