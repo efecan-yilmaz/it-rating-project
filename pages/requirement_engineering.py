@@ -87,6 +87,12 @@ export_data_to_json(merged, JSON_RE_DETAILS_DATA_PATH)
 
 # Use 'merged' as your working dataframe for KPI selection
 if not merged.empty:
+    # Ensure 'id' and 'base_tool_id' are present
+    if 'id' not in merged.columns:
+        merged['id'] = None
+    if 'base_tool_id' not in merged.columns:
+        merged['base_tool_id'] = None
+
     # Split the dataframe into tools and manual tasks for separate display
     tools_display_df = merged[merged['tool'] != 'None'].reset_index(drop=True)
     manual_tasks_display_df = merged[merged['tool'] == 'None'].reset_index(drop=True)
@@ -113,15 +119,20 @@ if not merged.empty:
         #"colloborative": "Colloborative",
         "needForChange": st.column_config.SelectboxColumn(label="Need For Change", options=NeedForChangeOptions),
         "voe": st.column_config.NumberColumn(label="VoE", format="%.1f", min_value=1.0, max_value=10),
+        "id": st.column_config.TextColumn(label="ID", disabled=True),
+        "base_tool_id": st.column_config.TextColumn(label="Base Tool ID", disabled=True),
     }
+
+    # Only show columns you want to display in the editor
+    tools_display_cols = [
+        'needForChange', 'voe',
+        'category', 'tool', 'digitalization', 'aiLevel', 'synchronization'
+        # 'id', 'base_tool_id' are NOT included here, so not shown
+    ]
 
     # Display editable table for tools
     if not edited_tools_df.empty:
         st.subheader("Tool Details")
-        tools_display_cols = [
-            'needForChange', 'voe',
-            'category', 'tool', 'digitalization', 'aiLevel', 'synchronization'#, 'colloborative'
-        ]
         edited_tools_df = edited_tools_df[tools_display_cols]
 
         editor_column_config = column_config.copy()
@@ -143,18 +154,12 @@ if not merged.empty:
             options=synchronizationOptions,
             required=True,
         )
-        # editor_column_config["colloborative"] = st.column_config.SelectboxColumn(
-        #     "Colloborative",
-        #     help="Select if the tool is collaborative",
-        #     options=ColloborativeOptions,
-        #     required=True,
-        # )
 
         edited_tools_df = st.data_editor(
             edited_tools_df,
             use_container_width=True,
             column_config=editor_column_config,
-            disabled=["category", "tool", "voe"],
+            disabled=["category", "tool", "voe", "id", "base_tool_id"],
             hide_index=True,
             key="tool_details_editor"
         )
@@ -164,7 +169,7 @@ if not merged.empty:
         st.subheader("Manual Tasks")
         manual_tasks_display_cols = [
             'needForChange', 'voe',
-            'category', 'tool', 'digitalization', 'aiLevel', 'synchronization'#, 'colloborative'
+            'category', 'tool', 'digitalization', 'aiLevel', 'synchronization'
         ]
         edited_manual_tasks_df = edited_manual_tasks_df[manual_tasks_display_cols]
 
@@ -175,18 +180,12 @@ if not merged.empty:
             options=synchronizationOptions,
             required=True,
         )
-        # manual_tasks_editor_config["colloborative"] = st.column_config.SelectboxColumn(
-        #     "Colloborative",
-        #     help="Select if the manual task is collaborative",
-        #     options=ColloborativeOptions,
-        #     required=True,
-        # )
 
         edited_manual_tasks_df = st.data_editor(
             edited_manual_tasks_df,
             use_container_width=True,
             column_config=manual_tasks_editor_config,
-            disabled=["category", "tool", "digitalization", "aiLevel", "voe"],
+            disabled=["category", "tool", "digitalization", "aiLevel", "voe", "id", "base_tool_id"],
             hide_index=True,
             key="manual_tasks_editor"
         )
@@ -195,8 +194,20 @@ if not merged.empty:
     if save_clicked:
         st.session_state['edited_tools_df'] = edited_tools_df
         st.session_state['edited_manual_tasks_df'] = edited_manual_tasks_df
-        df_to_save = pd.concat([edited_tools_df, edited_manual_tasks_df], ignore_index=True)
-        columns_to_save = ['needForChange', 'voe', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization']#, 'colloborative']
+
+        # Restore hidden columns before saving
+        # Merge edited_tools_df with original tools_display_df to get id/base_tool_id
+        tools_merged = tools_display_df[['category', 'tool', 'id', 'base_tool_id']].merge(
+            edited_tools_df, on=['category', 'tool'], how='right'
+        )
+        manual_merged = manual_tasks_display_df[['category', 'tool', 'id', 'base_tool_id']].merge(
+            edited_manual_tasks_df, on=['category', 'tool'], how='right'
+        )
+
+        df_to_save = pd.concat([tools_merged, manual_merged], ignore_index=True)
+        columns_to_save = [
+            'needForChange', 'voe', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'id', 'base_tool_id'
+        ]
         df_to_save = df_to_save[columns_to_save]
         export_data_to_json(df_to_save, JSON_RE_DETAILS_DATA_PATH)
         st.toast("Changes saved successfully!", icon="💾")
