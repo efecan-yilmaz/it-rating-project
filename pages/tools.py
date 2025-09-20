@@ -44,6 +44,8 @@ if not priority_data.empty:
         st.session_state.payment_method_select = priority_data['payment_method'].iloc[0]
     if 'methodical_support' in priority_data.columns and 'methodical_support_input' not in st.session_state:
         st.session_state.methodical_support_input = priority_data['methodical_support'].iloc[0]
+    if 'cost' in priority_data.columns and 'cost_input' not in st.session_state:
+        st.session_state.cost_input = priority_data['cost'].iloc[0]
 else:
     # Initialize session state with default values if no data is loaded.
     if 'usecase_select' not in st.session_state:
@@ -67,7 +69,7 @@ col1.number_input(
 col1.number_input(
     "Tool-Usability",
     min_value=1,
-    max_value=10,
+    max_value=5,
     step=1,
     key="tool_usability_input",
 )
@@ -81,9 +83,17 @@ col1.multiselect(
 col1.number_input(
   "Methodical Support",
   min_value=1,
-  max_value=10,
+  max_value=5,
   step=1,
   key="methodical_support_input"
+)
+
+col1.number_input(
+    "Cost",
+    min_value=1,
+    max_value=5,
+    step=1,
+    key="cost_input"
 )
 
 if st.button("💾 Save Prioritization"):
@@ -92,7 +102,8 @@ if st.button("💾 Save Prioritization"):
         'tool_integration': st.session_state.tool_integration_input,
         'tool_usability': st.session_state.tool_usability_input,
         'payment_method': st.session_state.payment_method_select,
-        'methodical_support': st.session_state.methodical_support_input
+        'methodical_support': st.session_state.methodical_support_input,
+        'cost': st.session_state.cost_input
     }
     export_data_to_json(pd.DataFrame([data]), JSON_PRIO_DATA_PATH)
     st.toast("Prioritization data saved successfully!", icon="💾")
