@@ -8,6 +8,32 @@ JSON_RE_DETAILS_DATA_PATH = "data/re_details_data.json"
 JSON_PRIO_DATA_PATH = "data/priority_data.json"
 JSON_USER_RATINGS_PATH = "data/user_ratings.json"
 TEMPLATE_PATH = "data/METIS_VoC.xlsx"
+DEF_TOOLS_DATA_PATH = "data/def_tools_data.xlsx"
+
+def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
+    """
+    Reads the first sheet of the given XLSX file and returns a dictionary:
+    {tool_id: {"activities": [{"activity": <string>, "category": <string>}, ...]}}
+    """
+    df = pd.read_excel(file_path, sheet_name=0, header=None)
+    tool_ids = df.iloc[0, 3:92].tolist()  # D to CM
+    activity_names = df.iloc[1:, 2].tolist()  # C, from row 2
+    category_names = df.iloc[1:, 1].tolist()  # B, from row 2
+    data = df.iloc[1:, 3:92]
+
+    result = {}
+    for col_idx, tool_id in enumerate(tool_ids):
+        if pd.isna(tool_id):
+            continue
+        activities = []
+        for row_idx, val in enumerate(data.iloc[:, col_idx]):
+            if val == 1:
+                activity = activity_names[row_idx]
+                category = category_names[row_idx]
+                if pd.notna(activity) and pd.notna(category):
+                    activities.append({"activity": activity, "category": category})
+        result[tool_id] = {"activities": activities}
+    return result
 
 def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
     default_columns = ["Tool Name", "ID", "Category1", "Category2", "Category3", "Category4"]

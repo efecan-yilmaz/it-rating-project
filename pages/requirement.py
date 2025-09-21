@@ -2,7 +2,8 @@ import streamlit as st
 
 from utils.utils import (
     JSON_RE_DETAILS_DATA_PATH,
-    load_details_data_from_json
+    load_details_data_from_json,
+    load_def_tools_data_from_xlsx
 )
 
 from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
@@ -13,6 +14,9 @@ st.title("Desigin Recommendation")
 
 # Load data
 details_df = load_details_data_from_json(JSON_RE_DETAILS_DATA_PATH)
+
+# data structure:
+# {tool_id: {"activities": [activity_dicts], "prio_score": float}}
 
 # Find tools and related activities using base_tool_id
 tools_list = details_df['base_tool_id'].dropna().unique().tolist()
@@ -25,10 +29,17 @@ for tool_id, tool_info in tools_dict.items():
   activities = tool_info["activities"]
   prio_score = tool_priorizitation(activities)  # Pass activities list
   tools_dict[tool_id]['prio_score'] = prio_score  # Add prio_score to tools_dict
-  st.header(f"Tool ID: {tool_id} - Prioritization Score: {prio_score:.2f}")
-  for activity in activities:
-    st.write(f"  Activity ID: {activity.get('id', 'N/A')} - Need For Change: {activity.get('needForChange', 'N/A')} - NFC Score: {activity.get('nfc_score', 0)}")
+  # st.header(f"Tool ID: {tool_id} - Prioritization Score: {prio_score:.2f}")
+  # for activity in activities:
+  #   st.write(f"  Activity ID: {activity.get('id', 'N/A')} - Need For Change: {activity.get('needForChange', 'N/A')} - NFC Score: {activity.get('nfc_score', 0)}")
 
+# load def_tool_data
+def_tools_data = load_def_tools_data_from_xlsx()
+
+for tool_name, tool_info in def_tools_data.items():
+  st.header(f"Tool: {tool_name}")
+  activities = tool_info.get("activities", [])
+  st.write(f"Activities: {activities}")
 
 
 
