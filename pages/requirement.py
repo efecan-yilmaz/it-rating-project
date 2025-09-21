@@ -8,7 +8,7 @@ from utils.utils import (
 
 from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
 
-from utils.requirement_calc import tool_priorizitation, calculate_digitalization_score
+from utils.requirement_calc import tool_priorizitation, calculate_def_tool_scores
 
 st.title("Desigin Recommendation")
 
@@ -40,12 +40,19 @@ def_tools_data = load_def_tools_data_from_xlsx()
 for tool_name, def_tool_info in def_tools_data.items():
   st.header(f"Tool: {tool_name}")
   activities = def_tool_info.get("activities", [])
-  calculate_digitalization_score(tools_dict, def_tool_info)
+  calculate_def_tool_scores(tools_dict, def_tool_info)
   st.write(f"Activities: {activities}")
   st.write(f"Automation: {def_tool_info.get('automation', 'N/A')}")
   st.write(f"AI Level: {def_tool_info.get('ai_level', 'N/A')}")
   st.write(f"Syncronization: {def_tool_info.get('syncronization', 'N/A')}")
+  st.write(f"Integration: {def_tool_info.get('integration', 'N/A')}")
+  st.write(f"Usability: {def_tool_info.get('usability', 'N/A')}")
+  st.write(f"Cost: {def_tool_info.get('cost', 'N/A')}")
+  st.write(f"Support: {def_tool_info.get('support', 'N/A')}")
+  st.write(f"Functionality: {def_tool_info.get('functionality', 'N/A')}")
   st.write(f"Digitalization Score: {def_tool_info.get('digitalization_score', 'N/A')}")
+  st.write(f"Preference Score: {def_tool_info.get('preference_score', 'N/A')}")
+  st.write(f"Capability Score: {def_tool_info.get('capability_score', 'N/A')}")
 
 
 

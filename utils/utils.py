@@ -13,8 +13,9 @@ DEF_TOOLS_DATA_PATH = "data/def_tools_data.xlsx"
 def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
     """
     Reads the first sheet of the given XLSX file and returns a dictionary:
-    {tool_id: {"activities": [{"activity": <string>, "category": <string>}, ...], "automation": <number>, "ai_level": <number>, "syncronization": <number>}}
-    Also reads the second sheet for automation, ai_level, and syncronization values.
+    {tool_id: {"activities": [{"activity": <string>, "category": <string>}, ...], "automation": <number>, "ai_level": <number>, "syncronization": <number>,
+               "integration": <value>, "usability": <value>, "cost": <value>, "support": <value>}}
+    Also reads the second sheet for automation, ai_level, syncronization, integration, usability, cost, and support values.
     """
     # First sheet: activities and categories
     df = pd.read_excel(file_path, sheet_name=0, header=None)
@@ -36,7 +37,7 @@ def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
                     activities.append({"activity": activity, "category": category})
         result[str(tool_id)] = {"activities": activities}
 
-    # Second sheet: automation, ai_level, syncronization
+    # Second sheet: automation, ai_level, syncronization, integration, usability, cost, support
     df2 = pd.read_excel(file_path, sheet_name=1, header=None)
     for idx in range(1, df2.shape[0]):
         tool_name = df2.iloc[idx, 0]
@@ -46,9 +47,25 @@ def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
         # Find matching tool in result (case-insensitive)
         for key in result:
             if str(key).strip().lower() == tool_name_lc:
-                automation = df2.iloc[idx, 8]   # Column I
-                ai_level = df2.iloc[idx, 9]     # Column J
-                syncronization = df2.iloc[idx, 10]  # Column K
+                # Columns: B=1, C=2, D=3, E=4, I=8, J=9, K=10
+                integration = df2.iloc[idx, 1]
+                usability = df2.iloc[idx, 2]
+                cost = df2.iloc[idx, 3]
+                support = df2.iloc[idx, 4]
+                functionality = df2.iloc[idx, 5]  # Column F
+                automation = df2.iloc[idx, 8]
+                ai_level = df2.iloc[idx, 9]
+                syncronization = df2.iloc[idx, 10]
+                if pd.notna(integration):
+                    result[key]["integration"] = integration
+                if pd.notna(usability):
+                    result[key]["usability"] = usability
+                if pd.notna(cost):
+                    result[key]["cost"] = cost
+                if pd.notna(support):
+                    result[key]["support"] = support
+                if pd.notna(functionality):
+                    result[key]["functionality"] = functionality
                 if pd.notna(automation):
                     result[key]["automation"] = automation
                 if pd.notna(ai_level):
