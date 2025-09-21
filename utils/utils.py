@@ -13,8 +13,10 @@ DEF_TOOLS_DATA_PATH = "data/def_tools_data.xlsx"
 def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
     """
     Reads the first sheet of the given XLSX file and returns a dictionary:
-    {tool_id: {"activities": [{"activity": <string>, "category": <string>}, ...]}}
+    {tool_id: {"activities": [{"activity": <string>, "category": <string>}, ...], "automation": <number>, "ai_level": <number>, "syncronization": <number>}}
+    Also reads the second sheet for automation, ai_level, and syncronization values.
     """
+    # First sheet: activities and categories
     df = pd.read_excel(file_path, sheet_name=0, header=None)
     tool_ids = df.iloc[0, 3:92].tolist()  # D to CM
     activity_names = df.iloc[1:, 2].tolist()  # C, from row 2
@@ -32,7 +34,29 @@ def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
                 category = category_names[row_idx]
                 if pd.notna(activity) and pd.notna(category):
                     activities.append({"activity": activity, "category": category})
-        result[tool_id] = {"activities": activities}
+        result[str(tool_id)] = {"activities": activities}
+
+    # Second sheet: automation, ai_level, syncronization
+    df2 = pd.read_excel(file_path, sheet_name=1, header=None)
+    for idx in range(1, df2.shape[0]):
+        tool_name = df2.iloc[idx, 0]
+        if pd.isna(tool_name):
+            continue
+        tool_name_lc = str(tool_name).strip().lower()
+        # Find matching tool in result (case-insensitive)
+        for key in result:
+            if str(key).strip().lower() == tool_name_lc:
+                automation = df2.iloc[idx, 8]   # Column I
+                ai_level = df2.iloc[idx, 9]     # Column J
+                syncronization = df2.iloc[idx, 10]  # Column K
+                if pd.notna(automation):
+                    result[key]["automation"] = automation
+                if pd.notna(ai_level):
+                    result[key]["ai_level"] = ai_level
+                if pd.notna(syncronization):
+                    result[key]["syncronization"] = syncronization
+                break  # Stop after first match
+
     return result
 
 def load_tool_data_from_json(file_path: str) -> pd.DataFrame:

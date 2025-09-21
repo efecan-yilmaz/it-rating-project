@@ -56,3 +56,36 @@ def get_sync_score(option):
     return 3
   else:
     return 0
+
+def calculate_digitalization_score(tools_dict, def_tool_info):
+  def_automation = def_tool_info.get("automation", 0)
+  def_ai_level = def_tool_info.get("ai_level", 0)
+  def_syncronization = def_tool_info.get("syncronization", 0)
+  for tool_id, tool_info in tools_dict.items():
+    digitalization_score = 0
+    activities = tool_info["activities"]
+    total_nfc = 0
+    for activity in activities:
+      automation_score = get_automation_score(activity.get("digitalization", "Automated"))
+      ai_level_score = get_ai_score(activity.get("aiLevel", "No"))
+      sync_score = get_sync_score(activity.get("synchronization", "Ad-Hoc File Sharing"))
+      nfc_score = activity.get("nfc_score", 0)
+
+      act_digi_score = 0
+      if def_automation >= automation_score:
+        act_digi_score += 1
+      if def_ai_level >= ai_level_score:
+        act_digi_score += 1
+      if def_syncronization >= sync_score:
+        act_digi_score += 1
+
+      digitalization_score += nfc_score * (act_digi_score / 3)  # Normalize to [0, 1]
+      total_nfc += nfc_score
+
+    if "digitalization_score" not in def_tool_info:
+      def_tool_info["digitalization_score"] = []
+    if total_nfc == 0:
+      score = 0
+    else:
+      score = digitalization_score / total_nfc if len(activities) > 0 else 0
+    def_tool_info["digitalization_score"].append({"tool_id": tool_id, "score": score})
