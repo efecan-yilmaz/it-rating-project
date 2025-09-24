@@ -24,7 +24,7 @@ def tool_priorizitation(activities):
     activity["nfc_score"] = nfc_score  # Store the score back in the activity
     activity_calc += nfc_score
   
-  return activity_calc / activity_count if activity_count > 0 else 0
+  return float(activity_calc / activity_count) if activity_count > 0 else 0
 
 def get_ai_score(level):
   if level == "No":
@@ -204,24 +204,71 @@ def calc_total_score_prioritization(tools_dict, def_tools_data):
     highest = find_highest_scorer(def_tools_data_copy)
     if not highest:
       break
-    tool_name, score = highest
-    tool_info = def_tools_data_copy.get(tool_name, {})
-    activities = tool_info.get("activities", [])
-    # Find which activities this tool covers
-    covered = []
-    for activity in activities:
-      activity_name = activity.get("activity", "N/A").strip().lower()
-      if activity_name in flat_activities:
-        covered.append(activity_name)
-    if covered:
-      results.append({"tool_name": tool_name, "score": score, "activities": covered})
-      for act in covered:
-        if act in flat_activities:
-          flat_activities.remove(act)
-    # Remove this tool from further consideration
-    def_tools_data_copy.pop(tool_name)
-    # If no activities matched, just continue
+    cover_calcs(highest, flat_activities, def_tools_data_copy, results)
 
   return results
+
+def cover_calcs(highest, flat_activities, def_tools_data_copy, results):
+  tool_name, score = highest
+  tool_info = def_tools_data_copy.get(tool_name, {})
+  activities = tool_info.get("activities", [])
+  # Find which activities this tool covers
+  covered = []
+  for activity in activities:
+    activity_name = activity.get("activity", "N/A").strip().lower()
+    if activity_name in flat_activities:
+      covered.append(activity_name)
+  if covered:
+    results.append({"tool_name": tool_name, "score": score, "activities": covered})
+    for act in covered:
+      if act in flat_activities:
+        flat_activities.remove(act)
+  # Remove this tool from further consideration
+  def_tools_data_copy.pop(tool_name)
+  # If no activities matched, just continue
+
+def calc_one_by_one_exchange_approach(tools_dict, def_tools_data):
+  if not tools_dict:
+    return []
+  copy_tools_dict = tools_dict.copy()
+  surpluss_activities = []
+  for tool_id, info in list(copy_tools_dict.items()):
+    activities = info.get("activities", []) or []
+    for activity in activities:
+      if activity.get("isManual") == True:
+        activity_name = activity.get("category", "N/A").strip().lower()
+        if activity_name not in surpluss_activities:
+          surpluss_activities.append(activity_name)
+        del copy_tools_dict[tool_id]
+        break
+  
+  ordered_tools = sorted(
+    copy_tools_dict.items(),
+    key=lambda item: item[1].get("prio_score", 0),
+    reverse=True
+  )
+  def_tools_data_copy = def_tools_data.copy()
+  results = []
+
+  for tool_id, info in ordered_tools:
+    activities = info.get("activities", []) or []
+    for activity in activities:
+      activity_name = activity.get("category", "N/A").strip().lower()
+      if activity_name not in surpluss_activities:
+        surpluss_activities.append(activity_name)
+      
+    highest = find_highest_scorer(def_tools_data_copy)
+    cover_calcs(highest, surpluss_activities, def_tools_data_copy, results)
+
+  # After looping through ordered_tools, cover any remaining surpluss_activities
+  while surpluss_activities and def_tools_data_copy:
+    highest = find_highest_scorer(def_tools_data_copy)
+    if not highest:
+      break
+    cover_calcs(highest, surpluss_activities, def_tools_data_copy, results)
+
+  return results
+
+
 
 

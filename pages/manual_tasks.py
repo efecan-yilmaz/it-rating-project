@@ -139,6 +139,7 @@ with col_prev_next[1]:
             # Remove rows where category might be an empty string or NaN
             processed_tools_df.dropna(subset=['category'], inplace=True)
             processed_tools_df = processed_tools_df[processed_tools_df['category'] != '']
+            processed_tools_df['isManual'] = False
         else:
             processed_tools_df = pd.DataFrame(columns=['tool', 'category', 'base_tool_id'])
 
@@ -148,6 +149,7 @@ with col_prev_next[1]:
             processed_manual_tasks_df['category'] = manual_task_df['CategoryName']
             processed_manual_tasks_df['tool'] = 'None'
             processed_manual_tasks_df['base_tool_id'] = manual_task_df['ID']
+            processed_manual_tasks_df['isManual'] = True
         else:
             processed_manual_tasks_df = pd.DataFrame(columns=['tool', 'category', 'base_tool_id'])
 
@@ -166,7 +168,7 @@ with col_prev_next[1]:
             combined_df['paymentMethod'] = 'Licensed'
             combined_df['tool'] = combined_df['tool'].fillna('')
 
-            final_df = combined_df[['id', 'category', 'tool', 'base_tool_id', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', 'paymentMethod']]
+            final_df = combined_df[['id', 'category', 'tool', 'base_tool_id', 'digitalization', 'aiLevel', 'synchronization', 'colloborative', 'paymentMethod', 'isManual']]
 
             details_from_disk = details_df.copy()
 

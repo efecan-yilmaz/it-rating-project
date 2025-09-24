@@ -8,7 +8,7 @@ from utils.utils import (
 
 from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
 
-from utils.requirement_calc import tool_priorizitation, calculate_def_tool_scores, calc_total_score_prioritization
+from utils.requirement_calc import tool_priorizitation, calculate_def_tool_scores, calc_total_score_prioritization, calc_one_by_one_exchange_approach
 
 st.title("Desigin Recommendation")
 
@@ -57,11 +57,14 @@ for tool_name, def_tool_info in def_tools_data.items():
   # st.write(f"Total Score: {def_tool_info.get('total_score', 'N/A')}")
 
 total_score_prio_result = calc_total_score_prioritization(tools_dict, def_tools_data)
+total_score_one_by_one_result = calc_one_by_one_exchange_approach(tools_dict, def_tools_data)
 
 st.header("### Final Recommendation Scores")
 st.write("The total score prio results:")
 st.write(total_score_prio_result)
 
+st.write("The one-by-one exchange approach results:")
+st.write(total_score_one_by_one_result)
 
 col_prev_next = st.columns([0.5, 0.5])
 with col_prev_next[0]:

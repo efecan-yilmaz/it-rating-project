@@ -94,8 +94,8 @@ if not merged.empty:
         merged['base_tool_id'] = None
 
     # Split the dataframe into tools and manual tasks for separate display
-    tools_display_df = merged[merged['tool'] != 'None'].reset_index(drop=True)
-    manual_tasks_display_df = merged[merged['tool'] == 'None'].reset_index(drop=True)
+    tools_display_df = merged[merged['isManual'] != True].reset_index(drop=True)
+    manual_tasks_display_df = merged[merged['isManual'] == True].reset_index(drop=True)
 
     # Initialize session state for edited dataframes
     if 'edited_tools_df' not in st.session_state:
@@ -116,6 +116,7 @@ if not merged.empty:
         "digitalization": "Digitalization",
         "aiLevel": "AI Level",
         "synchronization": "Synchronization",
+        "isManual": "Is Manual",
         #"colloborative": "Colloborative",
         "needForChange": st.column_config.SelectboxColumn(label="Need For Change", options=NeedForChangeOptions),
         "voe": st.column_config.NumberColumn(label="VoE", format="%.1f", min_value=1.0, max_value=10),
@@ -159,7 +160,7 @@ if not merged.empty:
             edited_tools_df,
             use_container_width=True,
             column_config=editor_column_config,
-            disabled=["category", "tool", "voe", "id", "base_tool_id"],
+            disabled=["category", "tool", "voe", "id", "base_tool_id", "isManual"],
             hide_index=True,
             key="tool_details_editor"
         )
@@ -185,7 +186,7 @@ if not merged.empty:
             edited_manual_tasks_df,
             use_container_width=True,
             column_config=manual_tasks_editor_config,
-            disabled=["category", "tool", "digitalization", "aiLevel", "voe", "id", "base_tool_id"],
+            disabled=["category", "tool", "digitalization", "aiLevel", "voe", "id", "base_tool_id", "isManual"],
             hide_index=True,
             key="manual_tasks_editor"
         )
@@ -204,9 +205,15 @@ if not merged.empty:
             edited_manual_tasks_df, on=['category', 'tool'], how='right'
         )
 
+        # Ensure 'isManual' is present in both merged DataFrames
+        if 'isManual' not in tools_merged.columns:
+            tools_merged['isManual'] = False
+        if 'isManual' not in manual_merged.columns:
+            manual_merged['isManual'] = True
+
         df_to_save = pd.concat([tools_merged, manual_merged], ignore_index=True)
         columns_to_save = [
-            'needForChange', 'voe', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'id', 'base_tool_id'
+            'needForChange', 'voe', 'category', 'tool', 'digitalization', 'aiLevel', 'synchronization', 'id', 'base_tool_id', 'isManual'
         ]
         df_to_save = df_to_save[columns_to_save]
         export_data_to_json(df_to_save, JSON_RE_DETAILS_DATA_PATH)
