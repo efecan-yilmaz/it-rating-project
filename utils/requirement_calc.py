@@ -193,7 +193,7 @@ def calc_total_score_prioritization(tools_dict, def_tools_data):
     for activity in activities:
       if not isinstance(activity, dict):
         continue
-      activity_name = activity.get("category", "N/A")
+      activity_name = activity.get("category", "N/A").strip().lower()
       if activity_name not in flat_activities:
         flat_activities.append(activity_name.strip().lower())
 
