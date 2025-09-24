@@ -7,11 +7,11 @@ from utils.utils import (
 
 def get_nfc_score(nfc):
   if nfc == "No need to change":
-    return 0
-  elif nfc == "Nice to change":
     return 1
-  elif nfc == "Must change":
+  elif nfc == "Nice to change":
     return 2
+  elif nfc == "Must change":
+    return 3
   else:
     return 0
 
@@ -28,37 +28,37 @@ def tool_priorizitation(activities):
 
 def get_ai_score(level):
   if level == "No":
-    return 0
-  elif level == "Descriptive":
     return 1
-  elif level == "Diagnostic":
+  elif level == "Descriptive":
     return 2
-  elif level == "Predictive":
+  elif level == "Diagnostic":
     return 3
-  elif level == "Prescriptive":
+  elif level == "Predictive":
     return 4
+  elif level == "Prescriptive":
+    return 5
   else:
     return 0
 
 def get_automation_score(option):
   if option == "Automated":
-    return 0
-  elif option == "AI-Asisted":
     return 1
-  elif option == "AI-Driven Automation":
+  elif option == "AI-Asisted":
     return 2
+  elif option == "AI-Driven Automation":
+    return 3
   else:
     return 0
 
 def get_sync_score(option):
   if option == "Ad-Hoc File Sharing":
-    return 0
-  elif option == "Planned Batch Exchange":
     return 1
-  elif option == "Standardized Data Interfaces":
+  elif option == "Planned Batch Exchange":
     return 2
-  elif option == "Real-Time Ecosystem Integration":
+  elif option == "Standardized Data Interfaces":
     return 3
+  elif option == "Real-Time Ecosystem Integration":
+    return 4
   else:
     return 0
   
@@ -89,7 +89,7 @@ def calculate_tool_preference_score(def_tool_info, user_usability, user_support,
           (def_tool_support * user_support) +
           (def_tool_integration * user_integration) +
           (def_tool_cost * user_cost) +
-          (def_tool_functionality) * 5) / (user_usability + user_support + user_integration + user_cost + 5)
+          (def_tool_functionality) * 5) / (25 * (user_usability + user_support + user_integration + user_cost + 5))
 
 
 
