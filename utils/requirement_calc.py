@@ -68,14 +68,14 @@ def read_user_preference_scores(def_tool_info):
   except FileNotFoundError:
     priority_data = pd.DataFrame()
   if priority_data.empty:
-    def_tool_info["preference_score"] = 0
+    def_tool_info["preference_score"] = 0.0
     return
   # Assuming only one relevant row for the current usecase
   row = priority_data.iloc[0]
-  user_usability = row.get("tool_usability", 0)
-  user_support = row.get("methodical_support", 0)
-  user_integration = row.get("tool_integration", 0)
-  user_cost = row.get("cost", 0)
+  user_usability = float(row.get("tool_usability", 0) or 0)
+  user_support = float(row.get("methodical_support", 0) or 0)
+  user_integration = float(row.get("tool_integration", 0) or 0)
+  user_cost = float(row.get("cost", 0) or 0)
   return user_usability, user_support, user_integration, user_cost
 
 def calculate_tool_preference_score(def_tool_info, user_usability, user_support, user_integration, user_cost):
@@ -100,9 +100,11 @@ def calculate_def_tool_scores(tools_dict, def_tool_info):
     user_usability, user_support, user_integration, user_cost = user_scores
   else:
     user_usability = user_support = user_integration = user_cost = 0
-  st.write(f"User Weights - Usability: {user_usability}, Support: {user_support}, Integration: {user_integration}, Cost: {user_cost}")
+  # st.write(f"User Weights - Usability: {user_usability}, Support: {user_support}, Integration: {user_integration}, Cost: {user_cost}")
   # calculate tool preference score
-  def_tool_info["preference_score"] = calculate_tool_preference_score(def_tool_info, user_usability, user_support, user_integration, user_cost)
+  def_tool_info["preference_score"] = float(
+    calculate_tool_preference_score(def_tool_info, user_usability, user_support, user_integration, user_cost)
+  )
 
   def_automation = def_tool_info.get("automation", -1)
   def_ai_level = def_tool_info.get("ai_level", -1)
@@ -156,7 +158,70 @@ def calculate_def_tool_scores(tools_dict, def_tool_info):
     else:
       total_cap_score = capability_score / total_nfc if len(activities) > 0 else 0
 
+    # Ensure total_score list exists before appending to it
+    if "total_score" not in def_tool_info:
+      def_tool_info["total_score"] = []
+
     def_tool_info["digitalization_score"].append({"tool_id": tool_id, "score": total_digi_score})
     def_tool_info["capability_score"].append({"tool_id": tool_id, "score": total_cap_score})
+    def_tool_info["total_score"].append({
+      "tool_id": tool_id,
+      "score": float(total_digi_score * total_cap_score + def_tool_info.get("preference_score", 0.0))
+    })
 
     # st.write(f"  Tool ID: {tool_id} - Digitalization Score: {score:.2f}")
+
+def find_highest_scorer(def_tools_data):
+  highest_scorer = None
+  highest_score = -1
+  for tool_name, def_tool_info in def_tools_data.items():
+    total_scores = def_tool_info.get("total_score", [])
+    for score_entry in total_scores:
+      score = score_entry.get("score", 0)
+      if score > highest_score:
+        highest_score = score
+        highest_scorer = (tool_name, score)
+  return highest_scorer
+
+def calc_total_score_prioritization(tools_dict, def_tools_data):
+  if not tools_dict:
+    return []
+
+  flat_activities = []
+  for tool_id, info in tools_dict.items():
+    activities = info.get("activities", []) or []
+    for activity in activities:
+      if not isinstance(activity, dict):
+        continue
+      activity_name = activity.get("category", "N/A")
+      if activity_name not in flat_activities:
+        flat_activities.append(activity_name.strip().lower())
+
+  def_tools_data_copy = def_tools_data.copy()
+  results = []
+
+  while flat_activities and def_tools_data_copy:
+    highest = find_highest_scorer(def_tools_data_copy)
+    if not highest:
+      break
+    tool_name, score = highest
+    tool_info = def_tools_data_copy.get(tool_name, {})
+    activities = tool_info.get("activities", [])
+    # Find which activities this tool covers
+    covered = []
+    for activity in activities:
+      activity_name = activity.get("activity", "N/A").strip().lower()
+      if activity_name in flat_activities:
+        covered.append(activity_name)
+    if covered:
+      results.append({"tool_name": tool_name, "score": score, "activities": covered})
+      for act in covered:
+        if act in flat_activities:
+          flat_activities.remove(act)
+    # Remove this tool from further consideration
+    def_tools_data_copy.pop(tool_name)
+    # If no activities matched, just continue
+
+  return results
+
+

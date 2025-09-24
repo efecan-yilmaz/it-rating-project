@@ -8,7 +8,7 @@ from utils.utils import (
 
 from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
 
-from utils.requirement_calc import tool_priorizitation, calculate_def_tool_scores
+from utils.requirement_calc import tool_priorizitation, calculate_def_tool_scores, calc_total_score_prioritization
 
 st.title("Desigin Recommendation")
 
@@ -21,15 +21,16 @@ details_df = load_details_data_from_json(JSON_RE_DETAILS_DATA_PATH)
 # Find tools and related activities using base_tool_id
 tools_list = details_df['base_tool_id'].dropna().unique().tolist()
 tools_dict = {
-  tool_id: {"activities": details_df[details_df['base_tool_id'] == tool_id].to_dict(orient='records')}
+  tool_id: {"activities": details_df[details_df['base_tool_id'] == tool_id].to_dict(orient='records'), "tool_name": details_df[details_df['base_tool_id'] == tool_id]['tool'].iloc[0]}
   for tool_id in tools_list
 }
 
 for tool_id, tool_info in tools_dict.items():
   activities = tool_info["activities"]
+  tool_name = tool_info["tool_name"]
   prio_score = tool_priorizitation(activities)  # Pass activities list
   tools_dict[tool_id]['prio_score'] = prio_score  # Add prio_score to tools_dict
-  st.header(f"Tool ID: {tool_id} - Prioritization Score: {prio_score:.2f}")
+  st.header(f"Tool Name: {tool_name} - Tool ID: {tool_id} - Prioritization Score: {prio_score:.2f}")
   for activity in activities:
     #st.write(f"  Activity ID: {activity.get('id', 'N/A')} - Activity Name: {activity.get('tool', 'N/A')} - Need For Change: {activity.get('needForChange', 'N/A')} - NFC Score: {activity.get('nfc_score', 0)}")
     st.write(activity)
@@ -38,22 +39,28 @@ for tool_id, tool_info in tools_dict.items():
 def_tools_data = load_def_tools_data_from_xlsx()
 
 for tool_name, def_tool_info in def_tools_data.items():
-  st.header(f"Tool: {tool_name}")
+  # st.header(f"Tool: {tool_name}")
   activities = def_tool_info.get("activities", [])
   calculate_def_tool_scores(tools_dict, def_tool_info)
-  st.write(f"Activities: {activities}")
-  st.write(f"Automation: {def_tool_info.get('automation', 'N/A')}")
-  st.write(f"AI Level: {def_tool_info.get('ai_level', 'N/A')}")
-  st.write(f"Syncronization: {def_tool_info.get('syncronization', 'N/A')}")
-  st.write(f"Integration: {def_tool_info.get('integration', 'N/A')}")
-  st.write(f"Usability: {def_tool_info.get('usability', 'N/A')}")
-  st.write(f"Cost: {def_tool_info.get('cost', 'N/A')}")
-  st.write(f"Support: {def_tool_info.get('support', 'N/A')}")
-  st.write(f"Functionality: {def_tool_info.get('functionality', 'N/A')}")
-  st.write(f"Digitalization Score: {def_tool_info.get('digitalization_score', 'N/A')}")
-  st.write(f"Preference Score: {def_tool_info.get('preference_score', 'N/A')}")
-  st.write(f"Capability Score: {def_tool_info.get('capability_score', 'N/A')}")
+  # st.write(f"Activities: {activities}")
+  # st.write(f"Automation: {def_tool_info.get('automation', 'N/A')}")
+  # st.write(f"AI Level: {def_tool_info.get('ai_level', 'N/A')}")
+  # st.write(f"Syncronization: {def_tool_info.get('syncronization', 'N/A')}")
+  # st.write(f"Integration: {def_tool_info.get('integration', 'N/A')}")
+  # st.write(f"Usability: {def_tool_info.get('usability', 'N/A')}")
+  # st.write(f"Cost: {def_tool_info.get('cost', 'N/A')}")
+  # st.write(f"Support: {def_tool_info.get('support', 'N/A')}")
+  # st.write(f"Functionality: {def_tool_info.get('functionality', 'N/A')}")
+  # st.write(f"Digitalization Score: {def_tool_info.get('digitalization_score', 'N/A')}")
+  # st.write(f"Preference Score: {def_tool_info.get('preference_score', 'N/A')}")
+  # st.write(f"Capability Score: {def_tool_info.get('capability_score', 'N/A')}")
+  # st.write(f"Total Score: {def_tool_info.get('total_score', 'N/A')}")
 
+total_score_prio_result = calc_total_score_prioritization(tools_dict, def_tools_data)
+
+st.header("### Final Recommendation Scores")
+st.write("The total score prio results:")
+st.write(total_score_prio_result)
 
 
 col_prev_next = st.columns([0.5, 0.5])
