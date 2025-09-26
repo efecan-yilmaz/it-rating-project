@@ -8,7 +8,7 @@ from utils.utils import (
 
 from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
 
-from utils.requirement_calc import tool_priorizitation, calculate_def_tools_preference_scores, run_total_score_prioritization, run_one_by_one_exchange_approach
+from utils.requirement_calc import tool_priorizitation, calculate_def_tools_preference_scores, run_total_score_prioritization, run_one_by_one_exchange_approach, run_forced_exchange_approach
 
 st.title("Desigin Recommendation")
 
@@ -44,6 +44,7 @@ for tool_name, def_tool_info in def_tools_data.items():
 
 run_total_score_prioritization(tools_dict, def_tools_data)
 run_one_by_one_exchange_approach(tools_dict, def_tools_data)
+run_forced_exchange_approach(tools_dict, def_tools_data)
 
 
   # calculate_def_tool_scores(tools_dict, def_tool_info)

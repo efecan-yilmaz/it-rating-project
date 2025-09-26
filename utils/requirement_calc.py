@@ -145,14 +145,18 @@ def calculate_digitalization_capability_scores(flat_activities, def_activities, 
   return total_digi_score, total_cap_score
 
 
-def find_highest_scorer(def_tools_data, flat_activities):
+def find_highest_scorer(def_tools_data, flat_activities, force_all_activities=False):
   highest_scorer = None
   highest_score = -1
+  flat_activity_names = {a.get("activity_name", "").strip().lower() for a in flat_activities}
   for def_tool_name, def_tool_info in def_tools_data.items():
     def_automation = def_tool_info.get("automation", -1)
     def_ai_level = def_tool_info.get("ai_level", -1)
     def_syncronization = def_tool_info.get("syncronization", -1)
     def_activities = def_tool_info.get("activities", [])
+    def_activity_names = {a.get("activity", "").strip().lower() for a in def_activities}
+    if force_all_activities and not flat_activity_names.issubset(def_activity_names):
+      continue
     digi_score, cap_score = calculate_digitalization_capability_scores(
       flat_activities, def_activities, def_automation, def_ai_level, def_syncronization
     )
@@ -166,8 +170,42 @@ def find_highest_scorer(def_tools_data, flat_activities):
         "cap_score": cap_score,
         "preference_score": def_tool_info.get("preference_score", 0.0)
       }
-  st.write(f"Highest Scorer: {highest_scorer}")
   return highest_scorer
+
+def run_forced_exchange_approach(tools_dict, def_tools_data):
+  if not tools_dict:
+    return []
+
+  copy_tools_dict = tools_dict.copy()
+  surpluss_activities = flatten_activities(copy_tools_dict, only_manual=True)
+
+  ordered_tools = sorted(
+    copy_tools_dict.items(),
+    key=lambda item: item[1].get("prio_score", 0),
+    reverse=True
+  )
+  def_tools_data_copy = def_tools_data.copy()
+  results = []
+
+  for tool_id, info in ordered_tools:
+    flatten_tool_activities = flatten_activities({tool_id: info})
+    highest = find_highest_scorer(def_tools_data_copy, flatten_tool_activities, True)
+    st.write(f"Forced Exchange - Highest for Tool ID {tool_id}")
+    st.write(highest)
+    surpluss_activities.extend(flatten_tool_activities)
+    if highest:
+      cover_calcs(highest, surpluss_activities, def_tools_data_copy, results)
+  
+  # After looping through ordered_tools, cover any remaining surpluss_activities
+  while surpluss_activities and def_tools_data_copy:
+    highest = find_highest_scorer(def_tools_data_copy, surpluss_activities)
+    if not highest:
+      break
+    cover_calcs(highest, surpluss_activities, def_tools_data_copy, results)
+
+  st.write("### Forced Exchange Approach Results:")
+  st.write(results)
+  return results
 
 def run_one_by_one_exchange_approach(tools_dict, def_tools_data):
   if not tools_dict:
@@ -190,12 +228,20 @@ def run_one_by_one_exchange_approach(tools_dict, def_tools_data):
     activities = info.get("activities", []) or []
     for activity in activities:
       activity_name = activity.get("category", "N/A").strip().lower()
-      # Only add if not already present by activity_name
-      if not any(act["activity_name"] == activity_name for act in surpluss_activities):
-        digitalization_score = get_automation_score(activity.get("digitalization", "Automated"))
-        ai_level_score = get_ai_score(activity.get("aiLevel", "No"))
-        sync_score = get_sync_score(activity.get("synchronization", "Ad-Hoc File Sharing"))
-        nfc_score = activity.get("nfc_score", 0)
+      digitalization_score = get_automation_score(activity.get("digitalization", "Automated"))
+      ai_level_score = get_ai_score(activity.get("aiLevel", "No"))
+      sync_score = get_sync_score(activity.get("synchronization", "Ad-Hoc File Sharing"))
+      nfc_score = activity.get("nfc_score", 0)
+
+      # Check if activity already exists in surpluss_activities
+      existing = next((act for act in surpluss_activities if act["activity_name"] == activity_name), None)
+      if existing:
+        # Update scores if new ones are higher
+        existing["digitalization"] = max(existing["digitalization"], digitalization_score)
+        existing["aiLevel"] = max(existing["aiLevel"], ai_level_score)
+        existing["synchronization"] = max(existing["synchronization"], sync_score)
+        existing["nfc_score"] = max(existing["nfc_score"], nfc_score)
+      else:
         surpluss_activities.append({
           "activity_name": activity_name,
           "digitalization": digitalization_score,
