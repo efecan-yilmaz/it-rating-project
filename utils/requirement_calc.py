@@ -173,6 +173,7 @@ def find_highest_scorer(def_tools_data, flat_activities, force_all_activities=Fa
   return highest_scorer
 
 def run_forced_exchange_approach(tools_dict, def_tools_data):
+  st.write("### Forced Exchange Approach Results:")
   if not tools_dict:
     return []
 
@@ -203,7 +204,6 @@ def run_forced_exchange_approach(tools_dict, def_tools_data):
       break
     cover_calcs(highest, surpluss_activities, def_tools_data_copy, results)
 
-  st.write("### Forced Exchange Approach Results:")
   st.write(results)
   return results
 
