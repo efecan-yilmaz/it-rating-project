@@ -9,6 +9,7 @@ from utils.utils import (
 from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
 
 from utils.requirement_calc import tool_priorizitation, calculate_def_tools_preference_scores, run_total_score_prioritization, run_one_by_one_exchange_approach, run_forced_exchange_approach
+import pandas as pd
 
 st.title("Desigin Recommendation")
 
@@ -16,7 +17,7 @@ st.title("Desigin Recommendation")
 details_df = load_details_data_from_json(JSON_RE_DETAILS_DATA_PATH)
 
 # data structure:
-# {tool_id: {"activities": [activity_dicts], "prio_score": float}}
+# {tool_id: {"activities": [activity_dicts]}
 
 # Find tools and related activities using base_tool_id
 tools_list = details_df['base_tool_id'].dropna().unique().tolist()
@@ -24,6 +25,51 @@ tools_dict = {
   tool_id: {"activities": details_df[details_df['base_tool_id'] == tool_id].to_dict(orient='records'), "tool_name": details_df[details_df['base_tool_id'] == tool_id]['tool'].iloc[0]}
   for tool_id in tools_list
 }
+
+st.header("Current Tool Stack")
+for tool_id, tool_info in tools_dict.items():
+  activities = tool_info["activities"]
+  tool_name = tool_info["tool_name"]
+  # Check for single manual activity
+  if len(activities) == 1 and activities[0].get('isManual', False):
+    st.subheader("Activities for Tool: Manual Task")
+  else:
+    st.subheader(f"Activities for Tool: {tool_name}")
+  if activities:
+    activity_df = pd.DataFrame(activities)
+    # Rename columns as requested
+    rename_map = {
+      'needForChange': 'Need for Change',
+      'voe': 'VoE',
+      'digitalization': 'Digitalization',
+      'aiLevel': 'AI Level',
+      'synchronization': 'Synchronization'
+    }
+    activity_df = activity_df.rename(columns=rename_map)
+    # Hide 'id', 'isManual', 'base_tool_id', and 'tool' columns in the displayed table
+    cols_to_hide = ['id', 'isManual', 'base_tool_id', 'tool']
+    visible_cols = [col for col in activity_df.columns if col not in cols_to_hide]
+    if 'category' in visible_cols:
+      visible_cols.remove('category')
+      visible_cols = ['category'] + visible_cols
+      activity_df = activity_df.rename(columns={'category': 'Activity'})
+      visible_cols[0] = 'Activity'
+
+    # Define color mapping for Need for Change
+    color_map = {
+      "No need to change": "background-color: #e0e0e0;",   # gray
+      "Nice to change": "background-color: #ffa500;",      # orange
+      "Must change": "background-color: #ff4c4c;"          # red
+    }
+
+    def highlight_row(row):
+      nfc = row.get('Need for Change', '')
+      return [color_map.get(nfc, "") for _ in row]
+
+    styled_df = activity_df[visible_cols].style.apply(highlight_row, axis=1)
+    st.write(styled_df)
+  else:
+    st.write("No activities found for this tool.")
 
 for tool_id, tool_info in tools_dict.items():
   activities = tool_info["activities"]
@@ -42,9 +88,15 @@ for tool_name, def_tool_info in def_tools_data.items():
   activities = def_tool_info.get("activities", [])
   calculate_def_tools_preference_scores(def_tool_info)
 
+st.header("Recommendation Results: Total Score Prioritization Approach")
 run_total_score_prioritization(tools_dict, def_tools_data)
+
+st.header("Recommendation Results: One-by-One Exchange Approach")
 run_one_by_one_exchange_approach(tools_dict, def_tools_data)
+
+st.header("Recommendation Results: Forced Exchange Approach")
 run_forced_exchange_approach(tools_dict, def_tools_data)
+
 
 
   # calculate_def_tool_scores(tools_dict, def_tool_info)
