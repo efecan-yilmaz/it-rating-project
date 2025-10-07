@@ -11,6 +11,8 @@ from utils.process_locator import determine_page, save_current_page, Page, run_r
 from utils.requirement_calc import tool_priorizitation, calculate_def_tools_preference_scores, run_total_score_prioritization, run_one_by_one_exchange_approach, run_forced_exchange_approach
 import pandas as pd
 
+run_redirect(Page.REQUIREMENT.value)
+
 st.title("Desigin Recommendation")
 
 # Load data
@@ -99,11 +101,14 @@ def display_recommendation_results(result_data):
       # Find matching activities from tools_dict by 'Activity' (category)
       activity_df = pd.DataFrame(activities, columns=["Activity"])
       if "Activity" in activity_df.columns:
+        # Capitalize first letter of each activity
+        activity_df["Activity"] = activity_df["Activity"].apply(lambda x: x.capitalize() if isinstance(x, str) else x)
+
         def get_max_need_for_change(activity_name):
           max_nfc = None
           for tool in tools_dict.values():
             for act in tool["activities"]:
-              if act.get("category").strip().lower() == activity_name:
+              if act.get("category").strip().lower() == activity_name.lower():
                 nfc = act.get("needForChange", "")
                 # Order: Must change > Nice to change > No need to change
                 order = {"Must change": 3, "Nice to change": 2, "No need to change": 1}
