@@ -173,7 +173,7 @@ def find_highest_scorer(def_tools_data, flat_activities, force_all_activities=Fa
   return highest_scorer
 
 def run_forced_exchange_approach(tools_dict, def_tools_data):
-  st.write("### Forced Exchange Approach Results:")
+  # st.write("### Forced Exchange Approach Results:")
   if not tools_dict:
     return []
 
@@ -191,8 +191,8 @@ def run_forced_exchange_approach(tools_dict, def_tools_data):
   for tool_id, info in ordered_tools:
     flatten_tool_activities = flatten_activities({tool_id: info})
     highest = find_highest_scorer(def_tools_data_copy, flatten_tool_activities, True)
-    st.write(f"Forced Exchange - Highest for Tool ID {tool_id}")
-    st.write(highest)
+    # st.write(f"Forced Exchange - Highest for Tool ID {tool_id}")
+    # st.write(highest)
     surpluss_activities.extend(flatten_tool_activities)
     if highest:
       cover_calcs(highest, surpluss_activities, def_tools_data_copy, results)
@@ -204,7 +204,7 @@ def run_forced_exchange_approach(tools_dict, def_tools_data):
       break
     cover_calcs(highest, surpluss_activities, def_tools_data_copy, results)
 
-  st.write(results)
+  # st.write(results)
   return results
 
 def run_one_by_one_exchange_approach(tools_dict, def_tools_data):
@@ -260,8 +260,8 @@ def run_one_by_one_exchange_approach(tools_dict, def_tools_data):
       break
     cover_calcs(highest, surpluss_activities, def_tools_data_copy, results)
 
-  st.write("### One-by-One Exchange Approach Results:")
-  st.write(results)
+  # st.write("### One-by-One Exchange Approach Results:")
+  # st.write(results)
   return results
 
 def flatten_activities(tools_dict, only_manual=False):
@@ -326,8 +326,8 @@ def run_total_score_prioritization(tools_dict, def_tools_data):
       break
     cover_calcs(highest, flat_activities, def_tools_data_copy, results)
 
-  st.write("### Total Score Prioritization Results:")
-  st.write(results)
+  # st.write("### Total Score Prioritization Results:")
+  # st.write(results)
   return results
 
 def cover_calcs(highest, flat_activities, def_tools_data_copy, results):

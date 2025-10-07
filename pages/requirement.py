@@ -27,6 +27,13 @@ tools_dict = {
 }
 
 st.header("Current Tool Stack")
+# Define color mapping for Need for Change
+color_map = {
+  "No need to change": "background-color: #e0e0e0;",   # gray
+  "Nice to change": "background-color: #ffa500;",      # orange
+  "Must change": "background-color: #ff4c4c;"          # red
+}
+
 for tool_id, tool_info in tools_dict.items():
   activities = tool_info["activities"]
   tool_name = tool_info["tool_name"]
@@ -55,13 +62,6 @@ for tool_id, tool_info in tools_dict.items():
       activity_df = activity_df.rename(columns={'category': 'Activity'})
       visible_cols[0] = 'Activity'
 
-    # Define color mapping for Need for Change
-    color_map = {
-      "No need to change": "background-color: #e0e0e0;",   # gray
-      "Nice to change": "background-color: #ffa500;",      # orange
-      "Must change": "background-color: #ff4c4c;"          # red
-    }
-
     def highlight_row(row):
       nfc = row.get('Need for Change', '')
       return [color_map.get(nfc, "") for _ in row]
@@ -76,10 +76,10 @@ for tool_id, tool_info in tools_dict.items():
   tool_name = tool_info["tool_name"]
   prio_score = tool_priorizitation(activities)  # Pass activities list
   tools_dict[tool_id]['prio_score'] = prio_score  # Add prio_score to tools_dict
-  st.header(f"Tool Name: {tool_name} - Tool ID: {tool_id} - Prioritization Score: {prio_score:.2f}")
-  for activity in activities:
-    #st.write(f"  Activity ID: {activity.get('id', 'N/A')} - Activity Name: {activity.get('tool', 'N/A')} - Need For Change: {activity.get('needForChange', 'N/A')} - NFC Score: {activity.get('nfc_score', 0)}")
-    st.write(activity)
+  # st.header(f"Tool Name: {tool_name} - Tool ID: {tool_id} - Prioritization Score: {prio_score:.2f}")
+  # for activity in activities:
+  #   #st.write(f"  Activity ID: {activity.get('id', 'N/A')} - Activity Name: {activity.get('tool', 'N/A')} - Need For Change: {activity.get('needForChange', 'N/A')} - NFC Score: {activity.get('nfc_score', 0)}")
+  #   st.write(activity)
 
 # load def_tool_data
 def_tools_data = load_def_tools_data_from_xlsx()
@@ -89,14 +89,53 @@ for tool_name, def_tool_info in def_tools_data.items():
   calculate_def_tools_preference_scores(def_tool_info)
 
 st.header("Recommendation Results: Total Score Prioritization Approach")
-run_total_score_prioritization(tools_dict, def_tools_data)
+total_score_prio_result = run_total_score_prioritization(tools_dict, def_tools_data)
+def display_recommendation_results(result_data):
+  for tool_result in result_data:
+    tool_name = tool_result.get("tool_name", "Unknown Tool")
+    activities = tool_result.get("activities", [])
+    st.subheader(f"{tool_name} - (Score: {tool_result.get('score', 'N/A'):.2f})")
+    if activities:
+      # Find matching activities from tools_dict by 'Activity' (category)
+      activity_df = pd.DataFrame(activities, columns=["Activity"])
+      if "Activity" in activity_df.columns:
+        def get_max_need_for_change(activity_name):
+          max_nfc = None
+          for tool in tools_dict.values():
+            for act in tool["activities"]:
+              if act.get("category").strip().lower() == activity_name:
+                nfc = act.get("needForChange", "")
+                # Order: Must change > Nice to change > No need to change
+                order = {"Must change": 3, "Nice to change": 2, "No need to change": 1}
+                if max_nfc is None or order.get(nfc, 0) > order.get(max_nfc, 0):
+                  max_nfc = nfc
+          return max_nfc
+
+        # Add 'Need For Change' column
+        activity_df["Need For Change"] = activity_df["Activity"].apply(
+          lambda x: get_max_need_for_change(x)
+        )
+
+        def highlight_row(row):
+          nfc = row.get("Need For Change", "")
+          return [color_map.get(nfc, "") for _ in row]
+
+        styled_df = activity_df.style.apply(highlight_row, axis=1)
+        st.write(styled_df)
+      else:
+        st.table(activity_df)
+    else:
+      st.write("No activities found for this tool.")
+
+display_recommendation_results(total_score_prio_result)
 
 st.header("Recommendation Results: One-by-One Exchange Approach")
-run_one_by_one_exchange_approach(tools_dict, def_tools_data)
+one_bye_one_exchange_result = run_one_by_one_exchange_approach(tools_dict, def_tools_data)
+display_recommendation_results(one_bye_one_exchange_result)
 
 st.header("Recommendation Results: Forced Exchange Approach")
-run_forced_exchange_approach(tools_dict, def_tools_data)
-
+forced_exchange_result = run_forced_exchange_approach(tools_dict, def_tools_data)
+display_recommendation_results(forced_exchange_result)
 
 
   # calculate_def_tool_scores(tools_dict, def_tool_info)
@@ -130,7 +169,7 @@ with col_prev_next[0]:
     save_current_page(Page.REQUIREMENT_ENGINEERING)
     clean_for_previous_direction(Page.REQUIREMENT)
     st.switch_page(Page.REQUIREMENT_ENGINEERING.value)
-with col_prev_next[1]:
-  if st.button("➡️ Next step"):
-    save_current_page(Page.REQUIREMENT)
-    st.switch_page(Page.REQUIREMENT.value)
+# with col_prev_next[1]:
+#   if st.button("➡️ Next step"):
+#     save_current_page(Page.REQUIREMENT)
+#     st.switch_page(Page.REQUIREMENT.value)
