@@ -5,9 +5,9 @@ import uuid
 import os
 from utils.utils import (JSON_FILE_PATH, load_tool_data_from_json, export_data_to_json, JSON_PRIO_DATA_PATH, export_data_to_json)
 from data.SelectValues import (Category1Options, Category2Options, Category3Options, Category4Options, UseCaseOptions, PaymentMethodOptions)
-from utils.process_locator import determine_page, save_current_page, Page, run_redirect
+from utils.process_locator import save_current_page, Page, run_redirect, clean_for_previous_direction
 
-run_redirect()
+run_redirect(Page.TOOLS.value)
 
 # Initialize the DataFrame in session state if it doesn't exist
 if 'tool_data_df' not in st.session_state:
@@ -297,6 +297,14 @@ next_step_enabled = os.path.exists(JSON_PRIO_DATA_PATH)
 if not next_step_enabled:
     st.warning("Please complete the Prioritization of Requirement before proceeding to the next step.")
 
-if st.button("➡️ Next step", disabled=not next_step_enabled):
-    save_current_page(Page.MANUAL_TASKS)
-    st.switch_page(Page.MANUAL_TASKS.value)
+col_prev_next = st.columns([0.5, 0.5])
+with col_prev_next[0]:
+    if st.button("⬅️ Previous step"):
+        save_current_page(Page.WELCOME)
+        clean_for_previous_direction(Page.TOOLS)
+        st.switch_page(Page.WELCOME.value)
+with col_prev_next[1]:
+    if st.button("➡️ Next step", disabled=not next_step_enabled):
+        save_current_page(Page.MANUAL_TASKS)
+        st.switch_page(Page.MANUAL_TASKS.value)
+        

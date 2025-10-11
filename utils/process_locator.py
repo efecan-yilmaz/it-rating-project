@@ -6,6 +6,7 @@ import json
 import streamlit as st
 
 class Page(Enum):
+    WELCOME = "pages/welcome.py"
     TOOLS = "pages/tools.py"
     MANUAL_TASKS = "pages/manual_tasks.py"
     DETAIL_DATA = "pages/detail_data.py"
@@ -23,14 +24,15 @@ def read_current_page() -> Page:
     try:
         with open(CURRENT_PAGE_JSON, "r") as f:
             data = json.load(f)
-            return Page(data.get("current_page", Page.TOOLS.value))
+            return Page(data.get("current_page", Page.WELCOME.value))
     except FileNotFoundError:
-        return Page.TOOLS
+        return Page.WELCOME
 
 def determine_page():
     current_page = read_current_page().value
-
-    if current_page == Page.TOOLS.value:
+    if current_page == Page.WELCOME.value:
+        return current_page
+    elif current_page == Page.TOOLS.value:
         return current_page
     elif current_page == Page.MANUAL_TASKS.value:
         if not os.path.exists(JSON_PRIO_DATA_PATH):
@@ -69,7 +71,7 @@ def determine_page():
         else:
             return current_page
 
-def run_redirect(default_page=Page.TOOLS.value):
+def run_redirect(default_page=Page.WELCOME.value):
     redirected_page = determine_page()
     if redirected_page and redirected_page != default_page:
         st.switch_page(redirected_page)

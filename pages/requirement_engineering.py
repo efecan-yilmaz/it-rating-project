@@ -18,7 +18,6 @@ from data.SelectValues import (
     DigitalizationOptions,
     AILevelOptions,
     synchronizationOptions,
-    ColloborativeOptions,
     NeedForChangeOptions
 )
 
@@ -173,6 +172,18 @@ if not merged.empty:
         edited_manual_tasks_df = edited_manual_tasks_df[manual_tasks_display_cols]
 
         manual_tasks_editor_config = column_config.copy()
+        manual_tasks_editor_config["digitalization"] = st.column_config.SelectboxColumn(
+            "Digitalization",
+            help="Select the digitalization level of the manual task",
+            options=DigitalizationOptions,
+            required=True,
+        )
+        manual_tasks_editor_config["aiLevel"] = st.column_config.SelectboxColumn(
+            "AI Level",
+            help="Select the AI level of the manual task",
+            options=AILevelOptions,
+            required=True,
+        )
         manual_tasks_editor_config["synchronization"] = st.column_config.SelectboxColumn(
             "Synchronization",
             help="Select the synchronization of the manual task",
@@ -184,7 +195,7 @@ if not merged.empty:
             edited_manual_tasks_df,
             use_container_width=True,
             column_config=manual_tasks_editor_config,
-            disabled=["category", "tool", "digitalization", "aiLevel", "voe", "id", "base_tool_id", "isManual"],
+            disabled=["category", "tool", "voe", "id", "base_tool_id", "isManual"],
             hide_index=True,
             key="manual_tasks_editor"
         )

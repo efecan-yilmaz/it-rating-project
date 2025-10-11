@@ -51,7 +51,9 @@ def ai_score_to_str(score):
   return mapping.get(score, "Unknown")
 
 def get_automation_score(option):
-  if option == "Automated":
+  if option == "Manual":
+    return 0
+  elif option == "Automated":
     return 1
   elif option == "AI-Asisted":
     return 2
@@ -62,6 +64,7 @@ def get_automation_score(option):
 
 def automation_score_to_str(score):
   mapping = {
+    0: "Manual",
     1: "Automated",
     2: "AI-Asisted",
     3: "AI-Driven Automation"
