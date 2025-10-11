@@ -59,7 +59,7 @@ with col_main[0]:
       }
       activity_df = activity_df.rename(columns=rename_map)
       # Hide 'id', 'isManual', 'base_tool_id', and 'tool' columns in the displayed table
-      cols_to_hide = ['id', 'isManual', 'base_tool_id', 'tool']
+      cols_to_hide = ['id', 'isManual', 'base_tool_id', 'tool', 'colloborative', 'paymentMethod']
       visible_cols = [col for col in activity_df.columns if col not in cols_to_hide]
       if 'category' in visible_cols:
         visible_cols.remove('category')
@@ -102,6 +102,10 @@ with col_main[1]:
       tool_name = tool_result.get("tool_name", "Unknown Tool")
       activities = tool_result.get("activities", [])
       st.subheader(f"{tool_name}")
+      st.write(f"Automation: {tool_result.get('automation', 'N/A')}")
+      st.write(f"AI Level: {tool_result.get('ai_level', 'N/A')}")
+      st.write(f"Syncronization: {tool_result.get('synchronization', 'N/A')}")
+      
       if activities:
         # Find matching activities from tools_dict by 'Activity' (category)
         activity_df = pd.DataFrame(activities, columns=["Activity"])

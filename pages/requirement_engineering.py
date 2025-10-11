@@ -104,8 +104,6 @@ if not merged.empty:
     if 'edited_manual_tasks_df' not in st.session_state:
         st.session_state['edited_manual_tasks_df'] = manual_tasks_display_df.copy()
 
-    save_clicked = st.button("💾 Save Changes", type="primary")
-
     # Use local variables for editing
     edited_tools_df = st.session_state['edited_tools_df']
     edited_manual_tasks_df = st.session_state['edited_manual_tasks_df']
@@ -190,6 +188,9 @@ if not merged.empty:
             hide_index=True,
             key="manual_tasks_editor"
         )
+
+    # Move the save button here, after the tables
+    save_clicked = st.button("💾 Save Changes", type="primary")
 
     # Only save to session_state and file when button is clicked
     if save_clicked:

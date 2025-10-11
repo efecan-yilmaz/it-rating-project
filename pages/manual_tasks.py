@@ -95,9 +95,10 @@ else:
         use_container_width=True
     )
 
-next_step_enabled = os.path.exists(JSON_MANUAL_TASKS_PATH)
+next_step_enabled = os.path.exists(JSON_MANUAL_TASKS_PATH) or os.path.exists(JSON_FILE_PATH)
 if not next_step_enabled:
-    st.warning("Please complete Manual Tasks Data Collection before proceeding to the next step.")
+    st.warning("Please either enter your Manual Tasks in this step or your Tool Stack in previous step to be able to continue to next step.")
+    st.warning("If you want to have general recommendations without detailed input data, please choose the related option in Welcome Page.")
 
 col_prev_next = st.columns([0.5, 0.5])
 with col_prev_next[0]:

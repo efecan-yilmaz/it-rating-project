@@ -40,6 +40,16 @@ def get_ai_score(level):
   else:
     return 0
 
+def ai_score_to_str(score):
+  mapping = {
+    1: "No",
+    2: "Descriptive",
+    3: "Diagnostic",
+    4: "Predictive",
+    5: "Prescriptive"
+  }
+  return mapping.get(score, "Unknown")
+
 def get_automation_score(option):
   if option == "Automated":
     return 1
@@ -49,6 +59,14 @@ def get_automation_score(option):
     return 3
   else:
     return 0
+
+def automation_score_to_str(score):
+  mapping = {
+    1: "Automated",
+    2: "AI-Asisted",
+    3: "AI-Driven Automation"
+  }
+  return mapping.get(score, "Unknown")
 
 def get_sync_score(option):
   if option == "Ad-Hoc File Sharing":
@@ -61,6 +79,15 @@ def get_sync_score(option):
     return 4
   else:
     return 0
+
+def sync_score_to_str(score):
+  mapping = {
+    1: "Ad-Hoc File Sharing",
+    2: "Planned Batch Exchange",
+    3: "Standardized Data Interfaces",
+    4: "Real-Time Ecosystem Integration"
+  }
+  return mapping.get(score, "Unknown")
   
 def read_user_preference_scores(def_tool_info):
   try:
@@ -168,7 +195,10 @@ def find_highest_scorer(def_tools_data, flat_activities, force_all_activities=Fa
         "total_score": total_score,
         "digi_score": digi_score,
         "cap_score": cap_score,
-        "preference_score": def_tool_info.get("preference_score", 0.0)
+        "preference_score": def_tool_info.get("preference_score", 0.0),
+        "automation": automation_score_to_str(def_automation),
+        "ai_level": ai_score_to_str(def_ai_level),
+        "synchronization": sync_score_to_str(def_syncronization),
       }
   return highest_scorer
 
@@ -344,7 +374,7 @@ def cover_calcs(highest, flat_activities, def_tools_data_copy, results):
         covered.append(activity_name)
         break
   if covered:
-    results.append({"tool_name": tool_name, "score": score, "activities": covered})
+    results.append({"tool_name": tool_name, "score": score, "activities": covered, **highest})
     # Remove covered activities from flat_activities
     flat_activities[:] = [fa for fa in flat_activities if fa.get("activity_name", "").strip().lower() not in covered]
   # Remove this tool from further consideration
