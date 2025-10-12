@@ -1,3 +1,4 @@
+from unittest import result
 import streamlit as st
 
 from utils.utils import (
@@ -8,7 +9,7 @@ from utils.utils import (
 
 from utils.process_locator import determine_page, save_current_page, Page, run_redirect, clean_for_previous_direction
 
-from utils.requirement_calc import tool_priorizitation, calculate_def_tools_preference_scores, run_total_score_prioritization, run_one_by_one_exchange_approach, run_forced_exchange_approach
+from utils.requirement_calc import read_user_preference_scores, tool_priorizitation, calculate_def_tools_preference_scores, run_total_score_prioritization, run_one_by_one_exchange_approach, run_forced_exchange_approach
 import pandas as pd
 
 run_redirect(Page.REQUIREMENT.value)
@@ -89,14 +90,23 @@ for tool_id, tool_info in tools_dict.items():
 
 # load def_tool_data
 def_tools_data = load_def_tools_data_from_xlsx()
+user_scores = read_user_preference_scores()
+if user_scores:
+  user_usability, user_support, user_integration, user_cost, user_payment = user_scores
+else:
+  user_usability = user_support = user_integration = user_cost = 0
+  user_payment = [1]
+
 
 for tool_name, def_tool_info in def_tools_data.items():
   activities = def_tool_info.get("activities", [])
-  calculate_def_tools_preference_scores(def_tool_info)
+  calculate_def_tools_preference_scores(def_tool_info, user_usability, user_support, user_integration, user_cost)
 
 with col_main[1]:
   st.header("Recommendation Results")
-  def display_recommendation_results(result_data):
+  def display_recommendation_results(result_data, payment_flag=True):
+    if not payment_flag:
+      st.warning(f"Couldn't find a recommendation that fits your payment method preferences. Showing best possible match without considering payment method.")
     for tool_result in result_data:
       tool_name = tool_result.get("tool_name", "Unknown Tool")
       activities = tool_result.get("activities", [])
@@ -139,20 +149,58 @@ with col_main[1]:
           st.table(activity_df)
       else:
         st.write("No activities found for this tool.")
+
+  def check_if_all_activities_covered(tools_dict, result_data):
+    all_activities = set()
+    for tool in tools_dict.values():
+      for activity in tool["activities"]:
+        category = activity.get("category", "").strip().lower()
+        if category:
+          all_activities.add(category)
+
+    covered_activities = set()
+    for tool in result_data:
+      for activity in tool.get("activities", []):
+        if isinstance(activity, str):
+          category = activity.strip().lower()
+        elif isinstance(activity, dict):
+          category = activity.get("category", "").strip().lower()
+        else:
+          continue
+        if category:
+          covered_activities.add(category)
+
+    uncovered_activities = all_activities - covered_activities
+    if not uncovered_activities:
+      return True
+    return False
+
   st.write("---")
-  [total_score_prio_result, total_score_prio_score] = run_total_score_prioritization(tools_dict, def_tools_data)
+  total_score_payment_flag = True
+  [total_score_prio_result, total_score_prio_score] = run_total_score_prioritization(tools_dict, def_tools_data, user_payment)
+  if not check_if_all_activities_covered(tools_dict, total_score_prio_result):
+    [total_score_prio_result, total_score_prio_score] = run_total_score_prioritization(tools_dict, def_tools_data)
+    total_score_payment_flag = False
   st.header(f"Total Score Prioritization Approach - Recommendation Score: {total_score_prio_score * 100:.2f}%" if total_score_prio_result else "Total Score Prioritization Approach - Recommendation Score: N/A")
-  display_recommendation_results(total_score_prio_result)
+  display_recommendation_results(total_score_prio_result, total_score_payment_flag)
   st.write("---")
 
-  [one_bye_one_exchange_result, one_by_one_score] = run_one_by_one_exchange_approach(tools_dict, def_tools_data)
+  one_by_one_payment_flag = True
+  [one_bye_one_exchange_result, one_by_one_score] = run_one_by_one_exchange_approach(tools_dict, def_tools_data, user_payment)
+  if not check_if_all_activities_covered(tools_dict, one_bye_one_exchange_result):
+    [one_bye_one_exchange_result, one_by_one_score] = run_one_by_one_exchange_approach(tools_dict, def_tools_data)
+    one_by_one_payment_flag = False
   st.header(f"One-by-One Exchange Approach - Recommendation Score: {one_by_one_score * 100:.2f}%" if one_bye_one_exchange_result else "One-by-One Exchange Approach - Recommendation Score: N/A")
-  display_recommendation_results(one_bye_one_exchange_result)
+  display_recommendation_results(one_bye_one_exchange_result, one_by_one_payment_flag)
   st.write("---")
 
-  [forced_exchange_result, forced_exchange_score] = run_forced_exchange_approach(tools_dict, def_tools_data)
+  forced_exchange_payment_flag = True
+  [forced_exchange_result, forced_exchange_score] = run_forced_exchange_approach(tools_dict, def_tools_data, user_payment)
+  if not check_if_all_activities_covered(tools_dict, forced_exchange_result):
+    [forced_exchange_result, forced_exchange_score] = run_forced_exchange_approach(tools_dict, def_tools_data)
+    forced_exchange_payment_flag = False
   st.header(f"Forced Exchange Approach - Recommendation Score: {forced_exchange_score * 100:.2f}%" if forced_exchange_result else "Forced Exchange Approach - Recommendation Score: N/A")
-  display_recommendation_results(forced_exchange_result)
+  display_recommendation_results(forced_exchange_result, forced_exchange_payment_flag)
 
 
   # calculate_def_tool_scores(tools_dict, def_tool_info)

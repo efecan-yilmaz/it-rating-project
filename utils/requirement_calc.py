@@ -91,22 +91,31 @@ def sync_score_to_str(score):
     4: "Real-Time Ecosystem Integration"
   }
   return mapping.get(score, "Unknown")
+
+def get_payment_method_score(methods):
+  payments = []
+  for method in methods:
+    if method == "Licensed":
+      payments.append(1)
+    elif method == "Subscription-based":
+      payments.append(2)
+    elif method == "Pay-Per-Use":
+      payments.append(3)
+  return payments if payments else [0]
   
-def read_user_preference_scores(def_tool_info):
+def read_user_preference_scores():
   try:
     priority_data = pd.read_json(JSON_PRIO_DATA_PATH, orient='records')
   except FileNotFoundError:
     priority_data = pd.DataFrame()
-  if priority_data.empty:
-    def_tool_info["preference_score"] = 0.0
-    return
   # Assuming only one relevant row for the current usecase
   row = priority_data.iloc[0]
   user_usability = float(row.get("tool_usability", 0) or 0)
   user_support = float(row.get("methodical_support", 0) or 0)
   user_integration = float(row.get("tool_integration", 0) or 0)
   user_cost = float(row.get("cost", 0) or 0)
-  return user_usability, user_support, user_integration, user_cost
+  user_payment = get_payment_method_score(row.get("payment_method", "N/A"))
+  return user_usability, user_support, user_integration, user_cost, user_payment
 
 def calculate_tool_preference_score(def_tool_info, user_usability, user_support, user_integration, user_cost):
   def_tool_integration = def_tool_info.get("integration", 0)
@@ -121,13 +130,7 @@ def calculate_tool_preference_score(def_tool_info, user_usability, user_support,
           (def_tool_cost * user_cost) +
           (def_tool_functionality) * 5) / (25 * (user_usability + user_support + user_integration + user_cost + 5))
 
-def calculate_def_tools_preference_scores(def_tool_info):
-  # Read user preference scores
-  user_scores = read_user_preference_scores(def_tool_info)
-  if user_scores:
-    user_usability, user_support, user_integration, user_cost = user_scores
-  else:
-    user_usability = user_support = user_integration = user_cost = 0
+def calculate_def_tools_preference_scores(def_tool_info, user_usability, user_support, user_integration, user_cost):
   # st.write(f"User Weights - Usability: {user_usability}, Support: {user_support}, Integration: {user_integration}, Cost: {user_cost}")
   # calculate tool preference score
   def_tool_info["preference_score"] = float(
@@ -205,7 +208,7 @@ def find_highest_scorer(def_tools_data, flat_activities, force_all_activities=Fa
       }
   return highest_scorer
 
-def run_forced_exchange_approach(tools_dict, def_tools_data):
+def run_forced_exchange_approach(tools_dict, def_tools_data, user_payment = None):
   # st.write("### Forced Exchange Approach Results:")
   if not tools_dict:
     return []
@@ -218,9 +221,19 @@ def run_forced_exchange_approach(tools_dict, def_tools_data):
     key=lambda item: item[1].get("prio_score", 0),
     reverse=True
   )
-  def_tools_data_copy = def_tools_data.copy()
-  results = []
+  
+  if user_payment and isinstance(user_payment, (list, tuple, set)):
+    def_tools_data_copy = {
+      k: v for k, v in def_tools_data.items()
+      if any(pm in user_payment for pm in (v.get("payment_method") if isinstance(v.get("payment_method"), (list, tuple, set)) else [v.get("payment_method")]))
+    }
+  else:
+    def_tools_data_copy = def_tools_data.copy()
 
+  results = []
+  if not def_tools_data_copy:
+    return [results, 0.0]
+  
   for tool_id, info in ordered_tools:
     flatten_tool_activities = flatten_activities({tool_id: info})
     highest = find_highest_scorer(def_tools_data_copy, flatten_tool_activities, True)
@@ -241,7 +254,7 @@ def run_forced_exchange_approach(tools_dict, def_tools_data):
   # st.write(results)
   return [results, score]
 
-def run_one_by_one_exchange_approach(tools_dict, def_tools_data):
+def run_one_by_one_exchange_approach(tools_dict, def_tools_data, user_payment = None):
   if not tools_dict:
     return []
   
@@ -255,8 +268,19 @@ def run_one_by_one_exchange_approach(tools_dict, def_tools_data):
     key=lambda item: item[1].get("prio_score", 0),
     reverse=True
   )
-  def_tools_data_copy = def_tools_data.copy()
+
+  if user_payment and isinstance(user_payment, (list, tuple, set)):
+    def_tools_data_copy = {
+      k: v for k, v in def_tools_data.items()
+      if any(pm in user_payment for pm in (v.get("payment_method") if isinstance(v.get("payment_method"), (list, tuple, set)) else [v.get("payment_method")]))
+    }
+  else:
+    def_tools_data_copy = def_tools_data.copy()
+
   results = []
+
+  if not def_tools_data_copy:
+    return [results, 0.0]
 
   for tool_id, info in ordered_tools:
     activities = info.get("activities", []) or []
@@ -346,14 +370,23 @@ def flatten_activities(tools_dict, only_manual=False):
 
   return flat_activities
 
-def run_total_score_prioritization(tools_dict, def_tools_data, payment_filter = []):
+def run_total_score_prioritization(tools_dict, def_tools_data, user_payment = None):
   if not tools_dict:
     return []
   
   flat_activities = flatten_activities(tools_dict)
   # st.write(f"Flat Activities: {flat_activities}")
-  def_tools_data_copy = def_tools_data.copy()
+  if user_payment and isinstance(user_payment, (list, tuple, set)):
+    def_tools_data_copy = {
+      k: v for k, v in def_tools_data.items()
+      if any(pm in user_payment for pm in (v.get("payment_method") if isinstance(v.get("payment_method"), (list, tuple, set)) else [v.get("payment_method")]))
+    }
+  else:
+    def_tools_data_copy = def_tools_data.copy()
   results = []
+
+  if not def_tools_data_copy:
+    return [results, 0.0]
 
   while flat_activities and def_tools_data_copy:
     highest = find_highest_scorer(def_tools_data_copy, flat_activities)

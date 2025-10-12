@@ -17,8 +17,8 @@ def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
     """
     Reads the first sheet of the given XLSX file and returns a dictionary:
     {tool_id: {"activities": [{"activity": <string>, "category": <string>}, ...], "automation": <number>, "ai_level": <number>, "syncronization": <number>,
-               "integration": <value>, "usability": <value>, "cost": <value>, "support": <value>}}
-    Also reads the second sheet for automation, ai_level, syncronization, integration, usability, cost, and support values.
+               "integration": <value>, "usability": <value>, "cost": <value>, "support": <value>, "payment_method": <list of strings>}}
+    Also reads the second sheet for automation, ai_level, syncronization, integration, usability, cost, support, and payment_method values.
     """
     # First sheet: activities and categories
     df = pd.read_excel(file_path, sheet_name=0, header=None)
@@ -40,7 +40,7 @@ def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
                     activities.append({"activity": activity, "category": category})
         result[str(tool_id)] = {"activities": activities}
 
-    # Second sheet: automation, ai_level, syncronization, integration, usability, cost, support
+    # Second sheet: automation, ai_level, syncronization, integration, usability, cost, support, payment_method
     df2 = pd.read_excel(file_path, sheet_name=1, header=None)
     for idx in range(1, df2.shape[0]):
         tool_name = df2.iloc[idx, 0]
@@ -50,7 +50,7 @@ def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
         # Find matching tool in result (case-insensitive)
         for key in result:
             if str(key).strip().lower() == tool_name_lc:
-                # Columns: B=1, C=2, D=3, E=4, I=8, J=9, K=10
+                # Columns: B=1, C=2, D=3, E=4, F=5, I=8, J=9, K=10, L=11
                 integration = df2.iloc[idx, 1]
                 usability = df2.iloc[idx, 2]
                 cost = df2.iloc[idx, 3]
@@ -59,6 +59,7 @@ def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
                 automation = df2.iloc[idx, 8]
                 ai_level = df2.iloc[idx, 9]
                 syncronization = df2.iloc[idx, 10]
+                payment_method_raw = df2.iloc[idx, 11]  # Column L
                 if pd.notna(integration):
                     result[key]["integration"] = integration
                 if pd.notna(usability):
@@ -75,6 +76,13 @@ def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
                     result[key]["ai_level"] = ai_level
                 if pd.notna(syncronization):
                     result[key]["syncronization"] = syncronization
+                if pd.notna(payment_method_raw):
+                    # Split by "/", trim, and filter out empty strings
+                    if str(payment_method_raw).strip() == "-":
+                        payment_methods = [0]
+                    else:
+                        payment_methods = [int(pm.strip()) for pm in str(payment_method_raw).split("/") if pm.strip()]
+                    result[key]["payment_method"] = payment_methods
                 break  # Stop after first match
 
     return result
