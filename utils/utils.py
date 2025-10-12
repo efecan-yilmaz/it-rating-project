@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import json
 
 JSON_FILE_PATH = "data/tool_data.json"
 JSON_MANUAL_TASKS_PATH = "data/manual_tasks_data.json"
@@ -9,6 +10,8 @@ JSON_PRIO_DATA_PATH = "data/priority_data.json"
 JSON_USER_RATINGS_PATH = "data/user_ratings.json"
 TEMPLATE_PATH = "data/METIS_VoC.xlsx"
 DEF_TOOLS_DATA_PATH = "data/def_tools_data.xlsx"
+JSON_SELECTED_USE_CASE_PATH = "data/selected_use_case.json"
+JSON_DEFAULT_USE_CASES_PATH = "data/default_use_cases.json"
 
 def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
     """
@@ -138,3 +141,22 @@ def export_data_to_json(df: pd.DataFrame, file_path: str):
         # st.toast(f"Data saved to {file_path}", icon="💾") # Optional: uncomment for save confirmation
     except Exception as e:
         st.toast(f"Error while saving data to '{file_path}': {e}")
+
+def load_from_json(file_path):
+    """
+    Loads the default use case from the specified JSON file.
+    Returns the content as a dictionary.
+    """
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data
+    except FileNotFoundError:
+        st.toast(f"'{file_path}' not found. Returning empty dictionary.")
+        return {}
+    except json.JSONDecodeError as e:
+        st.toast(f"Could not decode JSON from '{file_path}': {e}. Returning empty dictionary.")
+        return {}
+    except Exception as e:
+        st.toast(f"An unexpected error occurred while loading '{file_path}': {e}. Returning empty dictionary.")
+        return {}

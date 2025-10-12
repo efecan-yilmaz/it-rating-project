@@ -237,8 +237,9 @@ def run_forced_exchange_approach(tools_dict, def_tools_data):
       break
     cover_calcs(highest, surpluss_activities, def_tools_data_copy, results)
 
+  score = calculate_recommendation_score(tools_dict, results)
   # st.write(results)
-  return results
+  return [results, score]
 
 def run_one_by_one_exchange_approach(tools_dict, def_tools_data):
   if not tools_dict:
@@ -295,7 +296,8 @@ def run_one_by_one_exchange_approach(tools_dict, def_tools_data):
 
   # st.write("### One-by-One Exchange Approach Results:")
   # st.write(results)
-  return results
+  score = calculate_recommendation_score(tools_dict, results)
+  return [results, score]
 
 def flatten_activities(tools_dict, only_manual=False):
   flat_activities = []
@@ -344,7 +346,7 @@ def flatten_activities(tools_dict, only_manual=False):
 
   return flat_activities
 
-def run_total_score_prioritization(tools_dict, def_tools_data):
+def run_total_score_prioritization(tools_dict, def_tools_data, payment_filter = []):
   if not tools_dict:
     return []
   
@@ -361,7 +363,8 @@ def run_total_score_prioritization(tools_dict, def_tools_data):
 
   # st.write("### Total Score Prioritization Results:")
   # st.write(results)
-  return results
+  score = calculate_recommendation_score(tools_dict, results)
+  return [results, score]
 
 def cover_calcs(highest, flat_activities, def_tools_data_copy, results):
   tool_name = highest["tool_name"]
@@ -382,3 +385,23 @@ def cover_calcs(highest, flat_activities, def_tools_data_copy, results):
     flat_activities[:] = [fa for fa in flat_activities if fa.get("activity_name", "").strip().lower() not in covered]
   # Remove this tool from further consideration
   def_tools_data_copy.pop(tool_name, None)
+
+def find_number_of_unique_activities(tools_dict):
+  unique_activities = set()
+  for info in tools_dict.values():
+    activities = info.get("activities", []) or []
+    for activity in activities:
+      if isinstance(activity, dict):
+        activity_name = activity.get("category", "N/A").strip().lower()
+        unique_activities.add(activity_name)
+  return len(unique_activities)
+
+def calculate_recommendation_score(tools_dict, results):
+  total_activities = find_number_of_unique_activities(tools_dict)
+  if total_activities == 0:
+    return 0.0
+  recommendation_score = 0.0
+  for result in results:
+    covered_activities_len = len(result.get("activities", []))
+    recommendation_score += (covered_activities_len / total_activities) * result.get("total_score", 0.0)
+  return recommendation_score

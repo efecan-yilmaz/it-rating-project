@@ -1,4 +1,4 @@
-from utils.utils import (JSON_MANUAL_TASKS_PATH, JSON_DETAILS_DATA_PATH, JSON_USER_RATINGS_PATH, JSON_RE_DETAILS_DATA_PATH, JSON_PRIO_DATA_PATH)
+from utils.utils import (JSON_MANUAL_TASKS_PATH, JSON_SELECTED_USE_CASE_PATH, JSON_DETAILS_DATA_PATH, JSON_USER_RATINGS_PATH, JSON_RE_DETAILS_DATA_PATH, JSON_PRIO_DATA_PATH)
 import os
 import streamlit.components.v1 as components
 from enum import Enum
@@ -7,6 +7,7 @@ import streamlit as st
 
 class Page(Enum):
     WELCOME = "pages/welcome.py"
+    READY_USE_CASE = "pages/ready_use_case.py"
     TOOLS = "pages/tools.py"
     MANUAL_TASKS = "pages/manual_tasks.py"
     DETAIL_DATA = "pages/detail_data.py"
@@ -32,6 +33,12 @@ def determine_page():
     current_page = read_current_page().value
     if current_page == Page.WELCOME.value:
         return current_page
+    elif current_page == Page.READY_USE_CASE.value:
+        if not os.path.exists(JSON_SELECTED_USE_CASE_PATH):
+            save_current_page(Page.WELCOME)
+            return Page.WELCOME.value
+        else:
+            return current_page
     elif current_page == Page.TOOLS.value:
         return current_page
     elif current_page == Page.MANUAL_TASKS.value:

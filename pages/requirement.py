@@ -38,6 +38,7 @@ color_map = {
 col_main = st.columns([0.5, 0.5])
 with col_main[0]:
   st.header("Current Tool Stack")
+  st.write("---")
   st.header("Tools and Their Activities")
   for tool_id, tool_info in tools_dict.items():
     activities = tool_info["activities"]
@@ -95,13 +96,11 @@ for tool_name, def_tool_info in def_tools_data.items():
 
 with col_main[1]:
   st.header("Recommendation Results")
-  st.header("Total Score Prioritization Approach")
-  total_score_prio_result = run_total_score_prioritization(tools_dict, def_tools_data)
   def display_recommendation_results(result_data):
     for tool_result in result_data:
       tool_name = tool_result.get("tool_name", "Unknown Tool")
       activities = tool_result.get("activities", [])
-      st.subheader(f"{tool_name}")
+      st.subheader(f"{tool_name} - Tool Score: {tool_result.get('total_score', 0.0) * 100:.2f}%")
       st.write(f"Automation: {tool_result.get('automation', 'N/A')}")
       st.write(f"AI Level: {tool_result.get('ai_level', 'N/A')}")
       st.write(f"Syncronization: {tool_result.get('synchronization', 'N/A')}")
@@ -140,15 +139,19 @@ with col_main[1]:
           st.table(activity_df)
       else:
         st.write("No activities found for this tool.")
-
+  st.write("---")
+  [total_score_prio_result, total_score_prio_score] = run_total_score_prioritization(tools_dict, def_tools_data)
+  st.header(f"Total Score Prioritization Approach - Recommendation Score: {total_score_prio_score * 100:.2f}%" if total_score_prio_result else "Total Score Prioritization Approach - Recommendation Score: N/A")
   display_recommendation_results(total_score_prio_result)
+  st.write("---")
 
-  st.header("One-by-One Exchange Approach")
-  one_bye_one_exchange_result = run_one_by_one_exchange_approach(tools_dict, def_tools_data)
+  [one_bye_one_exchange_result, one_by_one_score] = run_one_by_one_exchange_approach(tools_dict, def_tools_data)
+  st.header(f"One-by-One Exchange Approach - Recommendation Score: {one_by_one_score * 100:.2f}%" if one_bye_one_exchange_result else "One-by-One Exchange Approach - Recommendation Score: N/A")
   display_recommendation_results(one_bye_one_exchange_result)
+  st.write("---")
 
-  st.header("Forced Exchange Approach")
-  forced_exchange_result = run_forced_exchange_approach(tools_dict, def_tools_data)
+  [forced_exchange_result, forced_exchange_score] = run_forced_exchange_approach(tools_dict, def_tools_data)
+  st.header(f"Forced Exchange Approach - Recommendation Score: {forced_exchange_score * 100:.2f}%" if forced_exchange_result else "Forced Exchange Approach - Recommendation Score: N/A")
   display_recommendation_results(forced_exchange_result)
 
 
