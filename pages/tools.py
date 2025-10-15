@@ -172,6 +172,9 @@ def delete_from_table():
     st.session_state.tool_data_df = current_df.drop(st.session_state.tool_data_df_edit.selection.rows).reset_index(drop=True)
     export_data_to_json(st.session_state.tool_data_df, JSON_FILE_PATH)
     st.toast("Selected tool(s) deleted.")
+    # Delete the file if the DataFrame is now empty
+    if st.session_state.tool_data_df.empty and os.path.exists(JSON_FILE_PATH):
+        os.remove(JSON_FILE_PATH)
 
 if st.session_state.tool_data_df.empty:
     st.info("No tools added yet. Use the form above to add your first tool.")
@@ -307,4 +310,3 @@ with col_prev_next[1]:
     if st.button("➡️ Next step", disabled=not next_step_enabled):
         save_current_page(Page.MANUAL_TASKS)
         st.switch_page(Page.MANUAL_TASKS.value)
-        

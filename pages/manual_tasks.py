@@ -78,6 +78,8 @@ def delete_from_table():
     st.session_state.manual_task_df = current_df.drop(st.session_state.manual_task_df_edit.selection.rows).reset_index(drop=True)
     export_data_to_json(st.session_state.manual_task_df, JSON_MANUAL_TASKS_PATH)
     st.toast("Selected task(s) deleted.")
+    if st.session_state.manual_task_df.empty and os.path.exists(JSON_MANUAL_TASKS_PATH):
+        os.remove(JSON_MANUAL_TASKS_PATH)
 
 if st.session_state.manual_task_df.empty:
     st.info("No manual tasks added yet. Use the form above to add your first task.")
