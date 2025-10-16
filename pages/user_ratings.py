@@ -12,6 +12,8 @@ from utils.process_locator import determine_page, save_current_page, Page, run_r
 run_redirect(Page.USER_RATINGS.value)
 
 st.title("User Ratings Collection")
+st.write("For tracking and traceability of the relevance and helpfulness of the IT Tools stack. Upload your user ratings in the provided Excel format. Ensure that the ratings are between 1 and 5 for each category.")
+st.write("You can upload multiple files at once. The uploaded data will be merged with existing ratings. This is not a must.")
 
 details_df = load_details_data_from_json(JSON_DETAILS_DATA_PATH)
 valid_ids = set(details_df["id"].astype(str))
@@ -118,10 +120,6 @@ if st.button("🗑️ Delete All User Ratings"):
     else:
         st.warning("No ratings file found to delete.")
 
-next_step_enabled = os.path.exists(JSON_USER_RATINGS_PATH)
-if not next_step_enabled:
-    st.warning("Please complete User Ratings Collection before proceeding to the next step.")
-
 col_prev_next = st.columns([0.5, 0.5])
 with col_prev_next[0]:
     if st.button("⬅️ Previous step"):
@@ -129,6 +127,6 @@ with col_prev_next[0]:
         clean_for_previous_direction(Page.USER_RATINGS)
         st.switch_page(Page.MANUAL_TASKS.value)
 with col_prev_next[1]:
-    if st.button("➡️ Next step", disabled=not next_step_enabled):
+    if st.button("➡️ Next step"):
         save_current_page(Page.REQUIREMENT_ENGINEERING)
         st.switch_page(Page.REQUIREMENT_ENGINEERING.value)

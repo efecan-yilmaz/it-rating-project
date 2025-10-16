@@ -25,6 +25,7 @@ for cat in CATEGORY_OPTIONS:
         st.session_state[cat] = []
 
 st.title("Manual Tasks Data Collection")
+st.write("Not all existing Taks must be fulfilled by a IT Tool. If you have manual tasks which you want to be fulfilled by an IT Tool. Please select manual IT tasks. This is not a must.")
 st.write("Please select categories related to your manual IT tasks")
 
 st.header("New Data")

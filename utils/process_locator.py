@@ -66,9 +66,6 @@ def determine_page():
         if not os.path.exists(JSON_DETAILS_DATA_PATH):
             save_current_page(Page.DETAIL_DATA)
             return Page.DETAIL_DATA.value
-        elif not os.path.exists(JSON_USER_RATINGS_PATH):
-            save_current_page(Page.USER_RATINGS)
-            return Page.USER_RATINGS.value
         else:
             return current_page
     elif current_page == Page.REQUIREMENT.value:

@@ -55,7 +55,25 @@ else:
 
 
 col1, col2 = st.columns([1, 3])
-col1.selectbox("Choose use case that you are in", UseCaseOptions, key="usecase_select")
+col1.selectbox(
+    "Choose use case that you are in",
+    UseCaseOptions,
+    key="usecase_select",
+    help="""
+**Use Case Descriptions:**
+
+- **Collaborative design:** Working together on complex CAD artefacts in authoring systems, regardless of time and location.
+- **Collaborative analysis:** Joint analysis of the current situation (current working methods, terminology, numbering systems, process phases, test criteria, accompanying regulations, etc. of the implementation team) and assignment of (new) functions to the new system for the introduction of, for example, a PLM/IoT system.
+- **Concept development:** Joint definition and specification of requirements, brainstorming, idea generation, concept sketches, design proposals and prototype development, regardless of time and place.
+- **Documentation:** Joint editing and storage of artefacts, regardless of time and place.
+- **Review situations:** Approval of artefacts, parallel discussion of work results, provision of technical and administrative data for approval in PDM systems.
+- **Prototyping and simulation:** Collaborative creation of prototypes, simulation of product performance, usability tests, regardless of time and location.
+- **Testing and validation:** Joint performance of functional tests, validation of product safety, assessment and evaluation, regardless of time and location.
+- **Change management:** Analysis of effects on affected components, collaborative implementation of changes and iterations to shared artefacts, versioning.
+- **Project management and time tracking:** Tracking of projects, budgets and working hours, monitoring of project progress, resource management, identification and management of project risks.
+- **Knowledge sharing:** Use of forums, discussion platforms, knowledge databases and mentoring programmes for the exchange of knowledge between teams.
+"""
+)
 
 # Add a number input that only allows values between 1 and 5
 col1.number_input(
@@ -64,6 +82,7 @@ col1.number_input(
     max_value=5,
     step=1,
     key="tool_integration_input",
+    help="Compatibility and connection to existing systems (interfaces)"
 )
 
 col1.number_input(
@@ -72,6 +91,7 @@ col1.number_input(
     max_value=5,
     step=1,
     key="tool_usability_input",
+    help="User-friendliness and ease of configuration and customisation"
 )
 
 col1.multiselect(
@@ -85,15 +105,17 @@ col1.number_input(
   min_value=1,
   max_value=5,
   step=1,
-  key="methodical_support_input"
+  key="methodical_support_input",
+  help="Employee training requirements, existing documentation and support services offered by the tool vendor"
 )
 
 col1.number_input(
-    "Cost",
+    "Costs",
     min_value=1,
     max_value=5,
     step=1,
-    key="cost_input"
+    key="cost_input",
+    help="Licence, implementation and ongoing operating costs"
 )
 
 if st.button("💾 Save Prioritization"):
@@ -109,6 +131,7 @@ if st.button("💾 Save Prioritization"):
     st.toast("Prioritization data saved successfully!", icon="💾")
 
 st.title("IT Tool Data Collection")
+st.write("To analyse the situation within the project, existing Tools and how they are used must be known. Please enter your IT tools and select related activities in the categories. A tool can fullfill more than one activity.")
 st.write("Please enter your IT tools and select related catagories")
 
 st.header("New Data")

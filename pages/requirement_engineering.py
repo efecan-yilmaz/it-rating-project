@@ -32,7 +32,7 @@ st.write("Please assign other values for the tools to reflect your necessities."
 def calculate_voe_from_user_ratings(details_df, user_ratings_path):
     # Load user ratings
     if not os.path.exists(user_ratings_path):
-        return [None] * len(details_df)
+        return [0] * len(details_df)
     user_ratings_df = pd.read_json(user_ratings_path)
     voe_columns = [
         "Frequency of Use", "Time Efficiency", "Output Quality",
