@@ -11,10 +11,16 @@ from utils.process_locator import determine_page, save_current_page, Page, run_r
 
 from utils.requirement_calc import read_user_preference_scores, tool_priorizitation, calculate_def_tools_preference_scores, run_total_score_prioritization, run_one_by_one_exchange_approach, run_forced_exchange_approach
 import pandas as pd
+from io import BytesIO
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
 
 run_redirect(Page.REQUIREMENT.value)
 
 st.title("Desigin Recommendation")
+
 
 # Load data
 details_df = load_details_data_from_json(JSON_RE_DETAILS_DATA_PATH)
@@ -104,13 +110,76 @@ for tool_name, def_tool_info in def_tools_data.items():
 
 with col_main[1]:
   st.header("Recommendation Results")
+
+  # add PDF generator helper
+  def generate_recommendation_pdf(tools_dict, approaches):
+    """
+    approaches: list of tuples (title, score, result_list)
+      where result_list is the list produced by each approach (tool result dicts).
+    """
+    buf = BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4, rightMargin=30,leftMargin=30, topMargin=30,bottomMargin=18)
+    styles = getSampleStyleSheet()
+    flow = []
+    flow.append(Paragraph("Recommendation Report", styles['Title']))
+    flow.append(Spacer(1, 12))
+
+    def get_max_nfc_for_activity(activity_name):
+      order = {"Must change": 3, "Nice to change": 2, "No need to change": 1}
+      max_nfc = None
+      for tool in tools_dict.values():
+        for act in tool["activities"]:
+          cat = (act.get("category") or "").strip().lower()
+          if cat and cat == (activity_name or "").strip().lower():
+            nfc = act.get("needForChange", "")
+            if max_nfc is None or order.get(nfc, 0) > order.get(max_nfc, 0):
+              max_nfc = nfc
+      return max_nfc or ""
+
+    for title, score, results in approaches:
+      flow.append(Paragraph(f"{title} - Recommendation Score: {score * 100:.2f}%" if results else f"{title} - Recommendation Score: N/A", styles['Heading2']))
+      flow.append(Spacer(1, 6))
+      if not results:
+        flow.append(Paragraph("No recommendation returned for this approach.", styles['Normal']))
+        flow.append(Spacer(1, 8))
+        continue
+
+      # build a simple table: Tool | Activities (with Need For Change)
+      table_data = [["Tool", "Activities (Need For Change)"]]
+      for tr in results:
+        tname = tr.get("tool_name", "Unknown")
+        acts = tr.get("activities", [])
+        # activities may be list of strings or dicts with 'category'
+        display_acts = []
+        for a in acts:
+          if isinstance(a, dict):
+            act_name = a.get("category", "")
+          else:
+            act_name = a
+          nfc = get_max_nfc_for_activity(act_name)
+          if act_name:
+            display_acts.append(f"{act_name.capitalize()} ({nfc})")
+        table_data.append([tname, "\n".join(display_acts)])
+      t = Table(table_data, colWidths=[160, 360])
+      t.setStyle(TableStyle([
+        ('BACKGROUND',(0,0),(-1,0),colors.HexColor("#f0f0f0")),
+        ('GRID',(0,0),(-1,-1),0.5,colors.grey),
+        ('VALIGN',(0,0),(-1,-1),'TOP'),
+      ]))
+      flow.append(t)
+      flow.append(Spacer(1, 12))
+
+    doc.build(flow)
+    buf.seek(0)
+    return buf.read()
+
   def display_recommendation_results(result_data, payment_flag=True):
     if not payment_flag:
       st.warning(f"Couldn't find a recommendation that fits your payment method preferences. Showing best possible match without considering payment method.")
     for tool_result in result_data:
       tool_name = tool_result.get("tool_name", "Unknown Tool")
       activities = tool_result.get("activities", [])
-      st.subheader(f"{tool_name} - Tool Score: {tool_result.get('total_score', 0.0) * 100:.2f}%")
+      st.subheader(f"{tool_name}")
       st.write(f"Automation: {tool_result.get('automation', 'N/A')}")
       st.write(f"AI Level: {tool_result.get('ai_level', 'N/A')}")
       st.write(f"Syncronization: {tool_result.get('synchronization', 'N/A')}")
@@ -181,24 +250,36 @@ with col_main[1]:
   if not check_if_all_activities_covered(tools_dict, total_score_prio_result):
     [total_score_prio_result, total_score_prio_score] = run_total_score_prioritization(tools_dict, def_tools_data)
     total_score_payment_flag = False
-  st.header(f"Total Score Prioritization Approach - Recommendation Score: {total_score_prio_score * 100:.2f}%" if total_score_prio_result else "Total Score Prioritization Approach - Recommendation Score: N/A")
-  display_recommendation_results(total_score_prio_result, total_score_payment_flag)
-  st.write("---")
 
   one_by_one_payment_flag = True
   [one_bye_one_exchange_result, one_by_one_score] = run_one_by_one_exchange_approach(tools_dict, def_tools_data, user_payment)
   if not check_if_all_activities_covered(tools_dict, one_bye_one_exchange_result):
     [one_bye_one_exchange_result, one_by_one_score] = run_one_by_one_exchange_approach(tools_dict, def_tools_data)
     one_by_one_payment_flag = False
-  st.header(f"One-by-One Exchange Approach - Recommendation Score: {one_by_one_score * 100:.2f}%" if one_bye_one_exchange_result else "One-by-One Exchange Approach - Recommendation Score: N/A")
-  display_recommendation_results(one_bye_one_exchange_result, one_by_one_payment_flag)
-  st.write("---")
 
   forced_exchange_payment_flag = True
   [forced_exchange_result, forced_exchange_score] = run_forced_exchange_approach(tools_dict, def_tools_data, user_payment)
   if not check_if_all_activities_covered(tools_dict, forced_exchange_result):
     [forced_exchange_result, forced_exchange_score] = run_forced_exchange_approach(tools_dict, def_tools_data)
     forced_exchange_payment_flag = False
+
+  # Prepare approaches and generate PDF for download (download button placed at top)
+  approaches = [
+    ("Total Score Prioritization Approach", total_score_prio_score or 0.0, total_score_prio_result),
+    ("One-by-One Exchange Approach", one_by_one_score or 0.0, one_bye_one_exchange_result),
+    ("Forced Exchange Approach", forced_exchange_score or 0.0, forced_exchange_result),
+  ]
+  pdf_bytes = generate_recommendation_pdf(tools_dict, approaches)
+  st.download_button(label="⬇️ Download Recommendation Report", data=pdf_bytes, file_name="recommendation_report.pdf", mime="application/pdf")
+
+  st.header(f"Total Score Prioritization Approach - Recommendation Score: {total_score_prio_score * 100:.2f}%" if total_score_prio_result else "Total Score Prioritization Approach - Recommendation Score: N/A")
+  display_recommendation_results(total_score_prio_result, total_score_payment_flag)
+  st.write("---")
+
+  st.header(f"One-by-One Exchange Approach - Recommendation Score: {one_by_one_score * 100:.2f}%" if one_bye_one_exchange_result else "One-by-One Exchange Approach - Recommendation Score: N/A")
+  display_recommendation_results(one_bye_one_exchange_result, one_by_one_payment_flag)
+  st.write("---")
+
   st.header(f"Forced Exchange Approach - Recommendation Score: {forced_exchange_score * 100:.2f}%" if forced_exchange_result else "Forced Exchange Approach - Recommendation Score: N/A")
   display_recommendation_results(forced_exchange_result, forced_exchange_payment_flag)
 
