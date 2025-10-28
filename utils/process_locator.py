@@ -1,4 +1,4 @@
-from utils.utils import (JSON_MANUAL_TASKS_PATH, JSON_SELECTED_USE_CASE_PATH, JSON_DETAILS_DATA_PATH, JSON_USER_RATINGS_PATH, JSON_RE_DETAILS_DATA_PATH, JSON_PRIO_DATA_PATH)
+from utils.utils import (CURRENT_PAGE_JSON, JSON_MANUAL_TASKS_PATH, JSON_SELECTED_USE_CASE_PATH, JSON_DETAILS_DATA_PATH, JSON_USER_RATINGS_PATH, JSON_RE_DETAILS_DATA_PATH, JSON_PRIO_DATA_PATH)
 import os
 import streamlit.components.v1 as components
 from enum import Enum
@@ -14,8 +14,6 @@ class Page(Enum):
     USER_RATINGS = "pages/user_ratings.py"
     REQUIREMENT_ENGINEERING = "pages/requirement_engineering.py"
     REQUIREMENT = "pages/requirement.py"
-
-CURRENT_PAGE_JSON = "data/current_page.json"
 
 def save_current_page(page: Page):
     with open(CURRENT_PAGE_JSON, "w") as f:
@@ -110,12 +108,14 @@ def hide_hidden_header_and_list_items():
     """
     Injects JavaScript to hide the <header> element with innerHTML 'hidden'
     and all subsequent <li> elements in the DOM, always running on the top window.
+    Also hides any <button> elements whose visible text contains "view" (case-insensitive).
     Runs immediately and then every 200ms.
     """
     components.html("""
     <script>
-    function hideHeadersAndListItems() {
-        const headers = window.top.document.querySelectorAll('header');
+    function hideHeadersListItemsAndViewButtons() {
+        const doc = window.top.document;
+        const headers = doc.querySelectorAll('header');
         let hide = false;
         headers.forEach(header => {
             if (header.innerHTML.trim() === "hidden") {
@@ -130,8 +130,20 @@ def hide_hidden_header_and_list_items():
                 }
             }
         });
+
+        // Hide any <button> elements whose visible text contains "view" (case-insensitive)
+        const buttons = doc.querySelectorAll('button');
+        buttons.forEach(btn => {
+            try {
+                if (btn.innerText && btn.innerText.trim().toLowerCase().includes("view")) {
+                    btn.style.display = "none";
+                }
+            } catch (e) {
+                // ignore cross-origin or other access issues
+            }
+        });
     }
-    hideHeadersAndListItems();
-    setInterval(hideHeadersAndListItems, 200);
+    hideHeadersListItemsAndViewButtons();
+    setInterval(hideHeadersListItemsAndViewButtons, 200);
     </script>
     """, height=0)

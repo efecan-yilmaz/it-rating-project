@@ -10,8 +10,7 @@ from utils.process_locator import save_current_page, Page, run_redirect, clean_f
 run_redirect(Page.TOOLS.value)
 
 # Initialize the DataFrame in session state if it doesn't exist
-if 'tool_data_df' not in st.session_state:
-    st.session_state.tool_data_df = load_tool_data_from_json(JSON_FILE_PATH)
+st.session_state.tool_data_df = load_tool_data_from_json(JSON_FILE_PATH)
 
 if "tool_name_input" not in st.session_state:
     st.session_state.tool_name_input = ""

@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import json
+import os
 
 JSON_FILE_PATH = "data/tool_data.json"
 JSON_MANUAL_TASKS_PATH = "data/manual_tasks_data.json"
@@ -12,6 +13,19 @@ TEMPLATE_PATH = "data/METIS_VoC.xlsx"
 DEF_TOOLS_DATA_PATH = "data/def_tools_data.xlsx"
 JSON_SELECTED_USE_CASE_PATH = "data/selected_use_case.json"
 JSON_DEFAULT_USE_CASES_PATH = "data/default_use_cases.json"
+CURRENT_PAGE_JSON = "data/current_page.json"
+
+FILE_MAP = [JSON_FILE_PATH, JSON_MANUAL_TASKS_PATH, JSON_DETAILS_DATA_PATH, JSON_RE_DETAILS_DATA_PATH,
+            JSON_PRIO_DATA_PATH, JSON_USER_RATINGS_PATH, JSON_SELECTED_USE_CASE_PATH, CURRENT_PAGE_JSON]
+
+def reset_application_data():
+    for file_path in FILE_MAP:
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            st.toast(f"Failed to delete '{file_path}': {e}")
+
 
 def load_def_tools_data_from_xlsx(file_path=DEF_TOOLS_DATA_PATH) -> dict:
     """
