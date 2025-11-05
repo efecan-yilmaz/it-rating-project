@@ -1,0 +1,345 @@
+[
+  {
+    "use_case": "Kollaboratives Design",
+    "stack_1": {
+      "tools": [
+        "Autodesk Vault",
+        "SolidWorks",
+        "MS Teams",
+        "Jira",
+        "Confluence",
+        "GanttPRO"
+      ],
+      "justification": "Klassisches CAD + PDM + Atlassian-Workflow für mechanische Baugruppen"
+    },
+    "stack_2": {
+      "tools": [
+        "SAP PLM",
+        "Fusion 360",
+        "Slack",
+        "ClickUp",
+        "Google Drive",
+        "Zoom"
+      ],
+      "justification": "SAP-basiertes PLM-Ökosystem mit Cloud-CAD und schlanker PM-Suite"
+    },
+    "stack_3": {
+      "tools": [
+        "PTC Windchill",
+        "CATIA",
+        "Zoom",
+        "monday.com",
+        "Onshape",
+        "Microsoft SharePoint"
+      ],
+      "justification": "Multi-CAD-Umgebung auf PTC-Technologie, ergänzt um modernes PM"
+    }
+  },
+  {
+    "use_case": "Kollaborative Analyse",
+    "stack_1": {
+      "tools": [
+        "Autodesk Vault",
+        "MATLAB",
+        "Fusion 360",
+        "MS Teams",
+        "Jira",
+        "Confluence"
+      ],
+      "justification": "Vault-zentrierter Datenhalt + MATLAB/ANSYS + Atlassian für Tickets & Wissen"
+    },
+    "stack_2": {
+      "tools": [
+        "SAP PLM",
+        "ANSYS",
+        "Slack",
+        "GitHub",
+        "Smartsheet",
+        "Google Drive"
+      ],
+      "justification": "SAP-PLM als Daten"
+    },
+    "stack_3": {
+      "tools": [
+        "Siemens Teamcenter",
+        "PTC Creo",
+        "Autodesk Inventor",
+        "Webex",
+        "Wrike",
+        "SharePoint"
+      ],
+      "justification": "Teamcenter-Analyse mit Creo/Inventor, ergänzt durch Wrike-PM"
+    }
+  },
+  {
+    "use_case": "Konzeptentwicklung",
+    "stack_1": {
+      "tools": [
+        "Miro",
+        "MS Teams",
+        "Notion",
+        "ClickUp",
+        "Google Drive",
+        "Figma"
+      ],
+      "justification": "Whiteboard-first, alles cloud-basiert, hohe Kreativ"
+    },
+    "stack_2": {
+      "tools": [
+        "Miro",
+        "Slack",
+        "Jira",
+        "Confluence",
+        "Smartsheet",
+        "GanttPRO"
+      ],
+      "justification": "Slack-Kommunikation, Airtable-Datenbank, Atlassian-Backlog"
+    },
+    "stack_3": {
+      "tools": [
+        "Zoom Workplace",
+        "Figma",
+        "monday.com",
+        "Basecamp",
+        "SharePoint",
+        "Adobe Connect"
+      ],
+      "justification": "Video-Workshops & Design-Mockups mit stabilem PM-Backbone"
+    }
+  },
+  {
+    "use_case": "Dokumentation",
+    "stack_1": {
+      "tools": [
+        "Confluence",
+        "Office 365",
+        "SharePoint",
+        "MS Teams",
+        "Adobe Acrobat"
+      ],
+      "justification": "Vollständig im Microsoft/Atlassian-Ökosystem"
+    },
+    "stack_2": {
+      "tools": [
+        "Google Drive",
+        "Slack",
+        "Zoom",
+        "Notion",
+        "Smartsheet"
+      ],
+      "justification": "Google-zentrisch mit Bluebeam für technische PDFs"
+    },
+    "stack_3": {
+      "tools": [
+        "Zoho Workplace",
+        "Webex",
+        "PDF24",
+        "Typeform",
+        "SAP PLM"
+      ],
+      "justification": "Kosten"
+    }
+  },
+  {
+    "use_case": "Review",
+    "stack_1": {
+      "tools": [
+        "Fusion 360",
+        "Autodesk Vault",
+        "MS Teams",
+        "Jira",
+        "Confluence"
+      ],
+      "justification": "Baugruppen-Review in Vault + Revu, gesteuert via Teams/Jira"
+    },
+    "stack_2": {
+      "tools": [
+        "Adobe Acrobat",
+        "SAP PLM",
+        "Slack",
+        "Smartsheet",
+        "Google Drive"
+      ],
+      "justification": "Acrobat-basierter PDF-Review mit Slack & SAP-Freigaben"
+    },
+    "stack_3": {
+      "tools": [
+        "PTC Windchill",
+        "CATIA",
+        "Webex Suite",
+        "Zoho Meeting",
+        "monday.com"
+      ],
+      "justification": "Live-Web-Review mit Windchill/Creo View"
+    }
+  },
+  {
+    "use_case": "Prototyping, Test und Validierung",
+    "stack_1": {
+      "tools": [
+        "Autodesk Fusion 360",
+        "Autodesk Vault",
+        "MATLAB / Simulink",
+        "Microsoft Teams",
+        "Jira",
+        "GanttPRO"
+      ],
+      "justification": "Autodesk-End-to-End für Rapid Prototyping"
+    },
+    "stack_2": {
+      "tools": [
+        "ANSYS",
+        "SAP PLM",
+        "Slack",
+        "NX",
+        "ClickUp",
+        "Google Drive"
+      ],
+      "justification": "SAP-/ANSYS-Schwerpunkt mit Slack-Kommunikation"
+    },
+    "stack_3": {
+      "tools": [
+        "PTC Creo",
+        "PTC Windchill",
+        "Webex",
+        "Smartsheet",
+        "Inventor"
+      ],
+      "justification": "Creo-basierter Proto-Workflow, moderiert per Webex"
+    }
+  },
+  {
+    "use_case": "Anforderungsmanagement",
+    "stack_1": {
+      "tools": [
+        "Jira",
+        "Autodesk Vault",
+        "Microsoft Teams",
+        "MATLAB / Simulink",
+        "GanttPRO"
+      ],
+      "justification": "Jira Xray + Vault Testdaten, gesteuert via Teams"
+    },
+    "stack_2": {
+      "tools": [
+        "SAP PLM",
+        "ANSYS",
+        "Slack",
+        "Smartsheet",
+        "Confluence"
+      ],
+      "justification": "SAP-Testobjekte & Slack-Kommunikation"
+    },
+    "stack_3": {
+      "tools": [
+        "Siemens Teamcenter",
+        "PTC Windchill",
+        "Webex Suite",
+        "ClickUp",
+        "Google Drive"
+      ],
+      "justification": "Teamcenter-Testlab mit ClickUp-Tracking"
+    }
+  },
+  {
+    "use_case": "Änderungsmanagement",
+    "stack_1": {
+      "tools": [
+        "Autodesk Vault",
+        "Jira",
+        "Microsoft Teams",
+        "SAP PLM",
+        "Confluence"
+      ],
+      "justification": "Vault-basiertes ECN mit Jira-Workflow"
+    },
+    "stack_2": {
+      "tools": [
+        "PTC Windchill",
+        "Slack",
+        "ClickUp",
+        "Siemens Teamcenter",
+        "Google Drive"
+      ],
+      "justification": "Windchill Change-Mgmt + Slack + ClickUp"
+    },
+    "stack_3": {
+      "tools": [
+        "CONTACT Software PLM",
+        "Webex",
+        "monday.com",
+        "Microsoft SharePoint",
+        "Aras Innovator"
+      ],
+      "justification": "CONTACT-PLM mit Monday-Workflow"
+    }
+  },
+  {
+    "use_case": "Task Management",
+    "stack_1": {
+      "tools": [
+        "GanttPRO",
+        "Microsoft Teams",
+        "Jira",
+        "Confluence",
+        "Microsoft SharePoint",
+        "Power BI"
+      ],
+      "justification": "Microsoft/Atlassian-Kern, Power-BI-Reporting"
+    },
+    "stack_2": {
+      "tools": [
+        "ClickUp",
+        "Slack",
+        "Asana",
+        "Smartsheet",
+        "Google Drive"
+      ],
+      "justification": "Slack-basierte Task-Organisation in ClickUp/Asana"
+    },
+    "stack_3": {
+      "tools": [
+        "monday.com",
+        "Teamwork.com",
+        "Webex Suite",
+        "SAP PLM",
+        "Smartsheet",
+        "Notion"
+      ],
+      "justification": "Monday-Suite + Teamwork für Multi-Projekt-KMU"
+    }
+  },
+  {
+    "use_case": "Wissensaustausch",
+    "stack_1": {
+      "tools": [
+        "Confluence",
+        "MS Teams",
+        "Notion",
+        "Google Drive",
+        "Jira"
+      ],
+      "justification": "Atlassian-Wiki plus Teams-Chat"
+    },
+    "stack_2": {
+      "tools": [
+        "SharePoint",
+        "Slack",
+        "Smartsheet",
+        "SAP PLM",
+        "Typeform"
+      ],
+      "justification": "SharePoint-Intranet mit Airtable-DB"
+    },
+    "stack_3": {
+      "tools": [
+        "Zoho Workplace",
+        "Basecamp",
+        "Webex",
+        "PDF24",
+        "ClickUp"
+      ],
+      "justification": "Kostengünstig mit Zoho & Basecamp"
+    }
+  }
+]
