@@ -15,15 +15,23 @@ default_use_cases = load_from_json(JSON_DEFAULT_USE_CASES_PATH)
 matching = next((uc for uc in default_use_cases if uc["use_case"] == selected_use_case), None)
 
 if matching:
-  stack1 = matching.get("stack_1", [])
-  stack2 = matching.get("stack_2", [])
-  stack3 = matching.get("stack_3", [])
+  definition = matching.get("definition", "")
+  st.write(f"**Definition:** {definition}")
+  requirements = matching.get("requirements", [])
+  st.write("**Key Requirements:**")
+  for req in requirements:
+    st.write(f"- {req}")
+  st.write("---")
+  recommended = matching.get("recommended_stacks", {})
+  stack1 = recommended.get("stack_1", [])
+  stack2 = recommended.get("stack_2", [])
+  stack3 = recommended.get("stack_3", [])
 
   def render_stack(stack, title):
     tools = stack.get("tools", [])
-    justification = stack.get("justification", "")
+    focus = stack.get("focus", "")
     st.subheader(title)
-    st.write(f"**Justification:** {justification}")
+    st.write(f"**Focus:** {focus}")
     for tool in tools:
       st.write(f"- {tool}")
 

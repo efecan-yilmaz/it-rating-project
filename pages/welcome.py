@@ -47,7 +47,14 @@ if st.button("🛠️ Proceed to Tool Stack and Manual Tasks Entry"):
   st.switch_page(Page.TOOLS.value)
 
 st.write("""
-<b>2. By Use Case Select:</b> <p>Select a specific engineering use case and receive a general recommended IT tool stack without detailed input data.</p>
+<b>2. By Use Case – Recommended IT Tool Stacks:</b> <p>This section provides targeted recommendations for <b>IT tool stacks<b> based on specific engineering collaboration use cases.</p>
+         <p>Each <b>use case</b> reflects a typical collaborative scenario encountered in product development, engineering, and production environments. For each, you will find:</p>
+         <ul>
+          <li><b>A definition</b> describing the collaborative situation</li>
+          <li><b>Key requirements</b> that the IT tools should fulfill</li>
+          <li><b>Three recommended IT tool stacks</b> optimized for different strategic needs — from deep enterprise integration to flexible cloud-based setups and cost-conscious solutions</li>
+         </ul>
+         <p>These recommendations are intended to help manufacturing companies select, adapt, or extend their IT ecosystems to <b>strengthen collaboration, increase efficiency, and reduce process friction</b> across the product lifecycle.</p>
          """, unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns([1, 2, 1])

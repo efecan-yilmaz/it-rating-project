@@ -12,14 +12,14 @@ UseCaseOptions = ["Concept Development", "Change Management", "Testing and Valid
 KPITypeOptions = ["Count / Total", "Trend", "Comparison", "Ratio", "Status", "Distribution"]
 VisualizationMethodOptions = ["Metric Card", "Gauge", "Donut", "Line Chart", "Area Chart", "Bar", "Column", "Pie", "Traffic Light", "Status Card", "Histogram", "Box Plot"]
 DefaultUseCases = [
-  "Kollaboratives Design",
-  "Kollaborative Analyse",
-  "Konzeptentwicklung",
-  "Dokumentation",
+  "Collaborative Design",
+  "Collaborative Analysis",
+  "Concept Development",
+  "Documentation",
   "Review",
-  "Prototyping, Test und Validierung",
-  "Anforderungsmanagement",
-  "Änderungsmanagement",
+  "Prototyping, Simulation & Validation",
+  "Requirements Management",
+  "Change Management",
   "Task Management",
-  "Wissensaustausch"
+  "Knowledge Sharing"
 ]
