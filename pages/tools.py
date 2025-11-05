@@ -52,7 +52,7 @@ else:
     if 'payment_method_select' not in st.session_state:
         st.session_state.payment_method_select = []
 
-
+st.write("""To assess the relevance of each requirement, please select a rating from 1 to 5, where 1 indicates ‘not relevant’ and 5 indicates ‘most relevant.’ Explanations for each requirement can be found by clicking the “?” icon.""");
 col1, col2 = st.columns([1, 3])
 col1.selectbox(
     "Choose use case that you are in",

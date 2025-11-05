@@ -19,7 +19,7 @@ from reportlab.lib import colors
 
 run_redirect(Page.REQUIREMENT.value)
 
-st.title("Desigin Recommendation")
+st.title("Design Recommendation")
 
 
 # Load data
