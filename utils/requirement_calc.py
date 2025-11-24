@@ -437,4 +437,8 @@ def calculate_recommendation_score(tools_dict, results):
   for result in results:
     covered_activities_len = len(result.get("activities", []))
     recommendation_score += (covered_activities_len / total_activities) * result.get("total_score", 0.0)
-  return recommendation_score
+  return normalize_score(recommendation_score)
+
+def normalize_score(score):
+  score = score * 100.0
+  return (((100.0 - score) / 100.0) * 60.0) + score

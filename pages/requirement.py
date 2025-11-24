@@ -137,7 +137,7 @@ with col_main[1]:
       return max_nfc or ""
 
     for title, score, results in approaches:
-      flow.append(Paragraph(f"{title} - Recommendation Score: {score * 100:.2f}%" if results else f"{title} - Recommendation Score: N/A", styles['Heading2']))
+      flow.append(Paragraph(f"{title} - Recommendation Score: {score:.2f}%" if results else f"{title} - Recommendation Score: N/A", styles['Heading2']))
       flow.append(Spacer(1, 6))
       if not results:
         flow.append(Paragraph("No recommendation returned for this approach.", styles['Normal']))
@@ -272,15 +272,15 @@ with col_main[1]:
   pdf_bytes = generate_recommendation_pdf(tools_dict, approaches)
   st.download_button(label="⬇️ Download Recommendation Report", data=pdf_bytes, file_name="recommendation_report.pdf", mime="application/pdf")
 
-  st.header(f"Total Score Prioritization Approach - Recommendation Score: {total_score_prio_score * 100:.2f}%" if total_score_prio_result else "Total Score Prioritization Approach - Recommendation Score: N/A")
+  st.header(f"Total Score Prioritization Approach - Recommendation Score: {total_score_prio_score:.2f}%" if total_score_prio_result else "Total Score Prioritization Approach - Recommendation Score: N/A")
   display_recommendation_results(total_score_prio_result, total_score_payment_flag)
   st.write("---")
 
-  st.header(f"One-by-One Exchange Approach - Recommendation Score: {one_by_one_score * 100:.2f}%" if one_bye_one_exchange_result else "One-by-One Exchange Approach - Recommendation Score: N/A")
+  st.header(f"One-by-One Exchange Approach - Recommendation Score: {one_by_one_score:.2f}%" if one_bye_one_exchange_result else "One-by-One Exchange Approach - Recommendation Score: N/A")
   display_recommendation_results(one_bye_one_exchange_result, one_by_one_payment_flag)
   st.write("---")
 
-  st.header(f"Forced Exchange Approach - Recommendation Score: {forced_exchange_score * 100:.2f}%" if forced_exchange_result else "Forced Exchange Approach - Recommendation Score: N/A")
+  st.header(f"Forced Exchange Approach - Recommendation Score: {forced_exchange_score:.2f}%" if forced_exchange_result else "Forced Exchange Approach - Recommendation Score: N/A")
   display_recommendation_results(forced_exchange_result, forced_exchange_payment_flag)
 
 
