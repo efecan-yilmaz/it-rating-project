@@ -175,7 +175,7 @@ with col_main[1]:
 
   def display_recommendation_results(result_data, payment_flag=True):
     if not payment_flag:
-      st.warning(f"Couldn't find a recommendation that fits your payment method preferences. Showing best possible match without considering payment method.")
+      st.warning(f"We couldn't find a recommendation that fits your payment method preferences. Showing best possible match without considering payment method.")
     for tool_result in result_data:
       tool_name = tool_result.get("tool_name", "Unknown Tool")
       activities = tool_result.get("activities", [])
