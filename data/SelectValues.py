@@ -10,7 +10,6 @@ Category3Options = ["Informing about Leave and Absences", "Delegating Tasks and 
 Category4Options = ["Developing solution options", "Rating - solution options", "Assess feasibility", "Sharing - Designs", "Performing numerical analysis", "Designing - 3D Modells and Assemblies", "Rendering and Visualizing Products", "Simulating Designs", "Preparing Prototypes", "Integrating Designs with Manufacturing Processes", "Using AR/VR environments", "Customizing User Interface and Ease of Use", "Gathering and defining requirements", "Negotiate product development contract", "Prioritising requirements", "Tracing requirements", "Validating requirements (Align results with stakeholders)", "Writing Lasten-/Pflichtenheft", "Create system architecture", "Open and view Designs", "Providing Feedback", "Review - Status Updates (Approval, Revision…)", "Designing - 2D Models and Assemblies"]
 UseCaseOptions = ["Concept Development", "Change Management", "Testing and Validation", "Project Management and Time Tracking", "Collaborative Design", "Prototyping and Simulation", "Knowledge Sharing", "Review", "Other"]
 KPITypeOptions = ["Count / Total", "Trend", "Comparison", "Ratio", "Status", "Distribution"]
-VisualizationMethodOptions = ["Metric Card", "Gauge", "Donut", "Line Chart", "Area Chart", "Bar", "Column", "Pie", "Traffic Light", "Status Card", "Histogram", "Box Plot"]
 DefaultUseCases = [
   "Collaborative Design",
   "Collaborative Analysis",
@@ -23,3 +22,4 @@ DefaultUseCases = [
   "Task Management",
   "Knowledge Sharing"
 ]
+VisualizationMethodOptions = ["Line Chart", "Multi-Line Chart", "Bar Chart", "Pie Chart", "Box Chart", "Heat Map"]

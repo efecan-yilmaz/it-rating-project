@@ -272,15 +272,18 @@ with col_main[1]:
   pdf_bytes = generate_recommendation_pdf(tools_dict, approaches)
   st.download_button(label="⬇️ Download Recommendation Report", data=pdf_bytes, file_name="recommendation_report.pdf", mime="application/pdf")
 
-  st.header(f"Total Score Prioritization Approach - Recommendation Score: {total_score_prio_score:.2f}%" if total_score_prio_result else "Total Score Prioritization Approach - Recommendation Score: N/A")
+  st.header(f"Total Score Prioritization Approach", help="This approach considers all tool activities all together to find the best matching tool set for all activities.")
+  st.header(f"Recommendation Score: {total_score_prio_score:.2f}%" if total_score_prio_result else "Total Score Prioritization Approach - Recommendation Score: N/A")
   display_recommendation_results(total_score_prio_result, total_score_payment_flag)
   st.write("---")
 
-  st.header(f"One-by-One Exchange Approach - Recommendation Score: {one_by_one_score:.2f}%" if one_bye_one_exchange_result else "One-by-One Exchange Approach - Recommendation Score: N/A")
+  st.header(f"One-by-One Exchange Approach", help="This approach considers tools' activities one by one to find the best matching tool for each activity.")
+  st.header(f"Recommendation Score: {one_by_one_score:.2f}%" if one_bye_one_exchange_result else "One-by-One Exchange Approach - Recommendation Score: N/A")
   display_recommendation_results(one_bye_one_exchange_result, one_by_one_payment_flag)
   st.write("---")
 
-  st.header(f"Forced Exchange Approach - Recommendation Score: {forced_exchange_score:.2f}%" if forced_exchange_result else "Forced Exchange Approach - Recommendation Score: N/A")
+  st.header(f"Forced Exchange Approach", help="This approach cosniders tools' activities prioritizing to find a tool that can cover all activities at once.")
+  st.header(f"Recommendation Score: {forced_exchange_score:.2f}%" if forced_exchange_result else "Forced Exchange Approach - Recommendation Score: N/A")
   display_recommendation_results(forced_exchange_result, forced_exchange_payment_flag)
 
 
