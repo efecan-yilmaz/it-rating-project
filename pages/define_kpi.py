@@ -11,6 +11,8 @@ st.write("Define your Key Performance Indicators (KPIs) for selected tools and m
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "kpi"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 KPI_FILE = DATA_DIR / "kpi_defs.json"
+MEASUREMENTS_DIR = DATA_DIR / "measurements"
+MEASUREMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
 def load_kpis():
     if KPI_FILE.exists():
@@ -156,20 +158,31 @@ def update_kpi(kpi_id, kpi):
             kpi["id"] = kpi_id
             st.session_state["kpi_defs"][i] = kpi
             save_kpis(st.session_state["kpi_defs"])
+            # Delete associated measurement file to prevent data inconsistency
+            measurement_file = MEASUREMENTS_DIR / f"{kpi_id}.json"
+            if measurement_file.exists():
+                measurement_file.unlink()
             return
 
 def delete_kpi(kpi_id):
     st.session_state["kpi_defs"] = [k for k in st.session_state["kpi_defs"] if k.get("id") != kpi_id]
     save_kpis(st.session_state["kpi_defs"])
+    # Also delete the associated measurement file
+    measurement_file = MEASUREMENTS_DIR / f"{kpi_id}.json"
+    if measurement_file.exists():
+        measurement_file.unlink()
 
 editing_id = st.session_state.get("editing_id")
 
+if editing_id:
+    st.warning("⚠️ **Warning:** Changing a KPI definition (e.g., its name or data mappings) may orphan existing measurements associated with it. If you proceed, you might need to re-enter or update your measurement data.")
+
 save_label = "💾 Update KPI" if editing_id else "💾 Save KPI"
-# Disable saving new KPIs if the limit of 6 is reached.
-save_disabled = not editing_id and len(st.session_state.get("kpi_defs", [])) >= 6
+# Disable saving new KPIs if the limit of 8 is reached.
+save_disabled = not editing_id and len(st.session_state.get("kpi_defs", [])) >= 8
 
 if save_disabled:
-    st.warning("You have reached the maximum of 6 KPIs. To add a new one, please delete an existing KPI.")
+    st.warning("You have reached the maximum of 8 KPIs. To add a new one, please delete an existing KPI.")
 
 if st.button(save_label, key="save_kpi_button", disabled=save_disabled):
     kpi = gather_inputs()
@@ -249,5 +262,9 @@ if kpis:
             delete_kpi(selected_kpi["id"])
             st.warning("KPI deleted.")
             st.rerun()
+    
+    if not delete_disabled:
+        st.warning("⚠️ **Warning:** Deleting a KPI will permanently remove all associated measurement data.")
+
 else:
     st.write("No KPIs defined yet. Use the form above to add one.")
