@@ -3,12 +3,14 @@ from data.SelectValues import KPITypeOptions, VisualizationMethodOptions
 import json
 import uuid
 from pathlib import Path
+import os
 
 st.title("Define KPI")
 st.write("Define your Key Performance Indicators (KPIs) for selected tools and manual tasks.")
 
-# storage path (project-relative)
-DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "kpi"
+# storage path (project-relative or APP_ROOT based)
+APP_ROOT = Path(os.environ.get('APP_ROOT', Path(__file__).resolve().parent.parent))
+DATA_DIR = APP_ROOT / "data" / "kpi"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 KPI_FILE = DATA_DIR / "kpi_defs.json"
 MEASUREMENTS_DIR = DATA_DIR / "measurements"

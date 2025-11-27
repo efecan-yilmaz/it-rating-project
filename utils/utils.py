@@ -3,17 +3,29 @@ import streamlit as st
 import json
 import os
 
-JSON_FILE_PATH = "data/tool_data.json"
-JSON_MANUAL_TASKS_PATH = "data/manual_tasks_data.json"
-JSON_DETAILS_DATA_PATH = "data/details_data.json"
-JSON_RE_DETAILS_DATA_PATH = "data/re_details_data.json"
-JSON_PRIO_DATA_PATH = "data/priority_data.json"
-JSON_USER_RATINGS_PATH = "data/user_ratings.json"
+# Define APP_ROOT for persistent data storage
+APP_ROOT = os.environ.get('APP_ROOT', os.path.abspath("."))
+DATA_DIR = os.path.join(APP_ROOT, "data")
+
+# Ensure the data directory exists in the persistent location
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+
+# Dynamic Data (Persistent)
+JSON_FILE_PATH = os.path.join(DATA_DIR, "tool_data.json")
+JSON_MANUAL_TASKS_PATH = os.path.join(DATA_DIR, "manual_tasks_data.json")
+JSON_DETAILS_DATA_PATH = os.path.join(DATA_DIR, "details_data.json")
+JSON_RE_DETAILS_DATA_PATH = os.path.join(DATA_DIR, "re_details_data.json")
+JSON_PRIO_DATA_PATH = os.path.join(DATA_DIR, "priority_data.json")
+JSON_USER_RATINGS_PATH = os.path.join(DATA_DIR, "user_ratings.json")
+JSON_SELECTED_USE_CASE_PATH = os.path.join(DATA_DIR, "selected_use_case.json")
+CURRENT_PAGE_JSON = os.path.join(DATA_DIR, "current_page.json")
+
+# Static Data (Bundled / Read-Only)
+# These rely on the CWD being set to the bundle directory (sys._MEIPASS) in frozen apps
 TEMPLATE_PATH = "data/METIS_VoC.xlsx"
 DEF_TOOLS_DATA_PATH = "data/def_tools_data.xlsx"
-JSON_SELECTED_USE_CASE_PATH = "data/selected_use_case.json"
 JSON_DEFAULT_USE_CASES_PATH = "data/default_use_cases.json"
-CURRENT_PAGE_JSON = "data/current_page.json"
 
 FILE_MAP = [JSON_FILE_PATH, JSON_MANUAL_TASKS_PATH, JSON_DETAILS_DATA_PATH, JSON_RE_DETAILS_DATA_PATH,
             JSON_PRIO_DATA_PATH, JSON_USER_RATINGS_PATH, JSON_SELECTED_USE_CASE_PATH, CURRENT_PAGE_JSON]

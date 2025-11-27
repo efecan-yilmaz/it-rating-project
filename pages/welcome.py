@@ -1,4 +1,3 @@
-from narwhals import col
 import streamlit as st
 from utils.process_locator import save_current_page, Page, run_redirect
 from data.SelectValues import DefaultUseCases

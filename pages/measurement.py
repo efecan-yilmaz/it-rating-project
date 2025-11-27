@@ -2,14 +2,15 @@ import streamlit as st
 import json
 from pathlib import Path
 import pandas as pd
+import os
 
 st.title("Measurement")
 st.write("Enter the measurement data for the defined KPIs.")
 
 # --- Data Loading and Saving ---
-BASE_DIR = Path(__file__).resolve().parent.parent
-KPI_DEFS_FILE = BASE_DIR / "data" / "kpi" / "kpi_defs.json"
-MEASUREMENTS_DIR = BASE_DIR / "data" / "kpi" / "measurements"
+APP_ROOT = Path(os.environ.get('APP_ROOT', Path(__file__).resolve().parent.parent))
+KPI_DEFS_FILE = APP_ROOT / "data" / "kpi" / "kpi_defs.json"
+MEASUREMENTS_DIR = APP_ROOT / "data" / "kpi" / "measurements"
 MEASUREMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
 def load_kpis():

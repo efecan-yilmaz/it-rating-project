@@ -1,4 +1,3 @@
-from unittest import result
 import streamlit as st
 
 from utils.utils import (

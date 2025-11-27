@@ -2,3 +2,5 @@
 !default_use_cases.json
 *.DS_Store
 notes.txt
+build/
+dist/

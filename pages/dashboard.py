@@ -4,15 +4,16 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import os
 
 
 st.title("Dashboard")
 st.write("Welcome to the KPI Dashboard. Here you can get an overview of your defined KPIs and their measurements.")
 
 # --- Data Loading ---
-BASE_DIR = Path(__file__).resolve().parent.parent
-KPI_DEFS_FILE = BASE_DIR / "data" / "kpi" / "kpi_defs.json"
-MEASUREMENTS_DIR = BASE_DIR / "data" / "kpi" / "measurements"
+APP_ROOT = Path(os.environ.get('APP_ROOT', Path(__file__).resolve().parent.parent))
+KPI_DEFS_FILE = APP_ROOT / "data" / "kpi" / "kpi_defs.json"
+MEASUREMENTS_DIR = APP_ROOT / "data" / "kpi" / "measurements"
 
 def load_kpis():
     """Loads all KPI definitions."""
