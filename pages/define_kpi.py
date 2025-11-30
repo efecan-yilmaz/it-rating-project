@@ -188,18 +188,32 @@ if save_disabled:
 
 if st.button(save_label, key="save_kpi_button", disabled=save_disabled):
     kpi = gather_inputs()
-    if editing_id:
-        update_kpi(editing_id, kpi)
-        st.success("KPI updated.")
-        del st.session_state["editing_id"]
+
+    # Check for duplicate labels
+    labels = [m.get("label", "").strip() for m in kpi["mappings"].values()]
+    non_empty_labels = [l for l in labels if l]
+
+    if not kpi.get("name"):
+        st.error("Please enter a KPI Name.")
+    elif not kpi.get("visualization"):
+        st.error("Please select a Visualization Method.")
+    elif len(non_empty_labels) < len(labels):
+        st.error("Please fill in all axis/series labels.")
+    elif len(non_empty_labels) != len(set(non_empty_labels)):
+        st.error("Labels must be unique. Please ensure no two axes/series have the same label.")
     else:
-        add_kpi(kpi)
-        st.success("KPI saved.")
-    # request main form clear on next run (perform clearing before widgets are created)
-    st.session_state["clear_form"] = True
-    # reload kpis into session and rerun so the cleared values take effect
-    st.session_state["kpi_defs"] = load_kpis()
-    st.rerun()
+        if editing_id:
+            update_kpi(editing_id, kpi)
+            st.success("KPI updated.")
+            del st.session_state["editing_id"]
+        else:
+            add_kpi(kpi)
+            st.success("KPI saved.")
+        # request main form clear on next run (perform clearing before widgets are created)
+        st.session_state["clear_form"] = True
+        # reload kpis into session and rerun so the cleared values take effect
+        st.session_state["kpi_defs"] = load_kpis()
+        st.rerun()
 
 st.markdown("### Saved KPIs")
 kpis = st.session_state.get("kpi_defs", [])

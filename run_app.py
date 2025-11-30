@@ -22,5 +22,6 @@ if __name__ == "__main__":
         "run",
         "app.py",
         "--global.developmentMode=false",
+        "--browser.gatherUsageStats=false",
     ]
     sys.exit(stcli.main())

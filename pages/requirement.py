@@ -18,7 +18,9 @@ from reportlab.lib import colors
 
 run_redirect(Page.REQUIREMENT.value)
 
-st.title("Design Recommendation")
+maintitle1, maintitle2 = st.columns([1, 1])
+maintitle1.title("Design Recommendation")
+maintitle2.info("Please use the sidebar menu to navigate to the KPI and Measurement operations.")
 
 
 # Load data

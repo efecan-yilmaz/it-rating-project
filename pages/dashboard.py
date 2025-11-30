@@ -54,6 +54,10 @@ for kpi in kpis:
     mappings = kpi.get("mappings", {})
     
     measurements = load_measurement_data(kpi_id)
+
+    # Ensure empty keys in measurements are treated as "untitled label"
+    if measurements:
+        measurements = [{ (k if k else "untitled label"): v for k, v in m.items() } for m in measurements]
     
     # Use the current column
     current_col = cols[col_idx % 2]
@@ -71,20 +75,20 @@ for kpi in kpis:
 
         try:
             if viz_type == "Line Chart":
-                x_label = mappings.get("x", {}).get("label")
-                y_label = mappings.get("y", {}).get("label")
+                x_label = mappings.get("x", {}).get("label") or "untitled label"
+                y_label = mappings.get("y", {}).get("label") or "untitled label"
                 if x_label and y_label and x_label in df.columns and y_label in df.columns:
                     if mappings.get("x", {}).get("type") == "Date":
                         df[x_label] = pd.to_datetime(df[x_label])
                     fig = px.line(df, x=x_label, y=y_label, title=kpi_name)
 
             elif viz_type == "Multi-Line Chart":
-                x_label = mappings.get("x", {}).get("label")
+                x_label = mappings.get("x", {}).get("label") or "untitled label"
                 if x_label and x_label in df.columns:
                     if mappings.get("x", {}).get("type") == "Date":
                         df[x_label] = pd.to_datetime(df[x_label])
                     
-                    y_series_labels = [info['label'] for key, info in mappings.items() if key.startswith('y_series_') and 'label' in info]
+                    y_series_labels = [(info['label'] or "untitled label") for key, info in mappings.items() if key.startswith('y_series_') and 'label' in info]
                     valid_y_series = [label for label in y_series_labels if label in df.columns]
                     
                     if valid_y_series:
@@ -92,11 +96,11 @@ for kpi in kpis:
                         fig = px.line(df_long, x=x_label, y='Value', color='Series', title=kpi_name)
 
             elif viz_type == "Bar Chart":
-                x_label = mappings.get("x", {}).get("label")
-                y_label = mappings.get("y", {}).get("label")
+                x_label = mappings.get("x", {}).get("label") or "untitled label"
+                y_label = mappings.get("y", {}).get("label") or "untitled label"
                 
                 if kpi.get("bar_grouped"):
-                    y_series_labels = [y_label] + [info['label'] for key, info in mappings.items() if key.startswith('y_bar_series_') and 'label' in info]
+                    y_series_labels = [y_label] + [(info['label'] or "untitled label") for key, info in mappings.items() if key.startswith('y_bar_series_') and 'label' in info]
                     valid_y_series = [label for label in y_series_labels if label in df.columns]
                     if x_label and x_label in df.columns and valid_y_series:
                         df_long = df.melt(id_vars=[x_label], value_vars=valid_y_series, var_name='Series', value_name='Value')
@@ -106,21 +110,21 @@ for kpi in kpis:
                         fig = px.bar(df, x=x_label, y=y_label, title=kpi_name)
 
             elif viz_type == "Pie Chart":
-                label_col = mappings.get("pie_label", {}).get("label")
-                value_col = mappings.get("pie_value", {}).get("label")
+                label_col = mappings.get("pie_label", {}).get("label") or "untitled label"
+                value_col = mappings.get("pie_value", {}).get("label") or "untitled label"
                 if label_col and value_col and label_col in df.columns and value_col in df.columns:
                     fig = px.pie(df, names=label_col, values=value_col, title=kpi_name)
 
             elif viz_type == "Box Chart":
-                group_col = mappings.get("box_group", {}).get("label")
-                value_col = mappings.get("box_value", {}).get("label")
+                group_col = mappings.get("box_group", {}).get("label") or "untitled label"
+                value_col = mappings.get("box_value", {}).get("label") or "untitled label"
                 if group_col and value_col and group_col in df.columns and value_col in df.columns:
                     fig = px.box(df, x=group_col, y=value_col, title=kpi_name)
 
             elif viz_type == "Heat Map":
-                x_label = mappings.get("heat_x", {}).get("label")
-                y_label = mappings.get("heat_y", {}).get("label")
-                value_col = mappings.get("heat_value", {}).get("label")
+                x_label = mappings.get("heat_x", {}).get("label") or "untitled label"
+                y_label = mappings.get("heat_y", {}).get("label") or "untitled label"
+                value_col = mappings.get("heat_value", {}).get("label") or "untitled label"
                 if x_label and y_label and value_col and x_label in df.columns and y_label in df.columns and value_col in df.columns:
                     # Pivot data for heatmap
                     pivot_df = df.pivot(index=y_label, columns=x_label, values=value_col)

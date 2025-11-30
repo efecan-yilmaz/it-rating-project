@@ -72,11 +72,12 @@ st.write("This demonstrator is a result of the METIS Research Project, which exp
 st.write("Start exploring and find your perfect collaborative IT tool setup – optimized for your work, your team, and your goals.")
 
 
-col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
 col1.image("assets/logo1.png", use_container_width=True)
 col2.image("assets/logo2.png", use_container_width=True)
 col3.image("assets/logo3.jpg", use_container_width=True)
 col4.image("assets/logo4.png", use_container_width=True)
+col5.image("assets/logo5.jpeg", use_container_width=True)
 components.html("""
 <script>
                 var intervalId = setInterval(function() {

@@ -128,7 +128,7 @@ def load_tool_data_from_json(file_path: str) -> pd.DataFrame:
             df[col] = df[col].apply(lambda x: x if isinstance(x, list) else ([] if pd.isna(x) else [x]))
         return df
     except FileNotFoundError:
-        st.toast(f"'{file_path}' not found. Starting with an empty tool list.")
+        # st.toast(f"'{file_path}' not found. Starting with an empty tool list.")
         return pd.DataFrame(columns=default_columns)
     except ValueError as e: # Handles empty or malformed JSON
         st.toast(f"Could not decode JSON from '{file_path}'. It might be empty or malformed. Error: {e}. Starting with an empty tool list.")

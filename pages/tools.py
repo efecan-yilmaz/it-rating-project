@@ -118,16 +118,19 @@ col1.number_input(
 )
 
 if st.button("💾 Save Prioritization"):
-    data = {
-        'usecase': st.session_state.usecase_select,
-        'tool_integration': st.session_state.tool_integration_input,
-        'tool_usability': st.session_state.tool_usability_input,
-        'payment_method': st.session_state.payment_method_select,
-        'methodical_support': st.session_state.methodical_support_input,
-        'cost': st.session_state.cost_input
-    }
-    export_data_to_json(pd.DataFrame([data]), JSON_PRIO_DATA_PATH)
-    st.toast("Prioritization data saved successfully!", icon="💾")
+    if not st.session_state.payment_method_select:
+        st.toast("Please select at least one Payment Method.", icon="⚠️")
+    else:
+        data = {
+            'usecase': st.session_state.usecase_select,
+            'tool_integration': st.session_state.tool_integration_input,
+            'tool_usability': st.session_state.tool_usability_input,
+            'payment_method': st.session_state.payment_method_select,
+            'methodical_support': st.session_state.methodical_support_input,
+            'cost': st.session_state.cost_input
+        }
+        export_data_to_json(pd.DataFrame([data]), JSON_PRIO_DATA_PATH)
+        st.toast("Prioritization data saved successfully!", icon="💾")
 
 st.title("IT Tool Data Collection")
 st.write("To analyse the situation within the project, existing Tools and how they are used must be known. Please enter your IT tools and select related activities in the categories. A tool can fullfill more than one activity.")
